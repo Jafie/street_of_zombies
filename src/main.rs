@@ -1,10 +1,11 @@
 mod player;
+use crate::player::MoveableSprite;
 
 use bevy::{
     prelude::*,
 };
 
-/// An implementation of the classic game "Breakout"
+
 fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
@@ -12,7 +13,6 @@ fn main() {
             title: "street_of_zombies".to_string(),
             width: 500.,
             height: 300.,
-            vsync: true,
             ..Default::default()
         })
         .add_startup_system(setup.system())
@@ -38,7 +38,7 @@ fn setup(
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
-        .insert(player::MainCharacter { speed: 500.0 });
+        .insert(player::MainCharacter::new(500.0));
 }
 
 /// This system will then change the title during execution
@@ -47,34 +47,43 @@ fn set_window_title(mut windows: ResMut<Windows>) {
     window.set_title(String::from("Street of Zombies"));
 }
 
-pub fn keyboard_capture(
+
+fn keyboard_capture(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&player::MainCharacter, &mut Transform)>,
 ) {
     if let Ok((main_character, mut transform)) = query.single_mut() {
-        let mut direction : f32 = 0.0;
-        let translation = &mut transform.translation;
+        let mut direction : (f32, f32) = (0.0, 0.0);
+        let mut number_of_valid_pressure : u8 = 0;
 
         if keyboard_input.pressed(KeyCode::Left) {
-            direction -= 1.0;
-            main_character.move_sprite(&time, &direction, &mut translation.x)
+            direction.0 -= 1.0;
+            number_of_valid_pressure += 1;
         }
-        else if keyboard_input.pressed(KeyCode::Right) {
-            direction += 1.0;
-            main_character.move_sprite(&time, &direction, &mut translation.x)
+        if keyboard_input.pressed(KeyCode::Right) {
+            direction.0 += 1.0;
+            number_of_valid_pressure += 1;
         }
-        else if keyboard_input.pressed(KeyCode::Up) {
-            direction += 1.0;
-            main_character.move_sprite(&time, &direction, &mut translation.y)
+        if keyboard_input.pressed(KeyCode::Up) {
+            direction.1 += 1.0;
+            number_of_valid_pressure += 1;
         }
-        else if keyboard_input.pressed(KeyCode::Down) {
-            direction -= 1.0;
-            main_character.move_sprite(&time, &direction, &mut translation.y)
+        if keyboard_input.pressed(KeyCode::Down) {
+            direction.1 -= 1.0;
+            number_of_valid_pressure += 1;
         }
-        else if keyboard_input.pressed(KeyCode::Space) {
-            direction -= 1.0;
-            main_character.move_sprite(&time, &direction, &mut translation.y)
+
+
+        match number_of_valid_pressure {
+            0 => return,
+            1 => (),
+            _ => { 
+                direction.0 = direction.0 / 1.5;
+                direction.1 = direction.1 / 1.5;
+            }
         }
+
+        main_character.move_sprite(&time, &direction, &mut transform.translation);
     }
 }
