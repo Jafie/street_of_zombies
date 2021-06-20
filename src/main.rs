@@ -1,6 +1,5 @@
 mod moveable_sprites;
 use crate::moveable_sprites::MoveableSprite;
-use crate::moveable_sprites::Weapon;
 
 
 // Game area limit
@@ -114,7 +113,7 @@ fn fire_capture(
             main_character.fire(&mut commands, &mut materials);
         }
         else {
-            main_character.reload();
+            main_character.reload_weapon();
         }
     }
 }
@@ -131,10 +130,8 @@ fn projectile_movement_system(
         let direction_of_fire = projectile.get_direction();
         projectile.move_sprite(&time, &direction_of_fire, &mut transform.translation);
 
-        let (proj_x, proj_y) = projectile.get_position();
-
         // If outside of game area, delete
-        if proj_x.abs() > GAME_AREA_LIMIT_X || proj_y.abs() > GAME_AREA_LIMIT_Y {
+        if projectile.is_out_of_distance() {
             commands.entity(projectile_entity).despawn();
         }
     }
