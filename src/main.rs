@@ -105,13 +105,13 @@ fn keyboard_capture(
 fn fire_capture(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut time: ResMut<Time>,
+    time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&mut moveable_sprites::MainCharacter, &mut Transform)>,
 ) {
     if let Ok((mut main_character, _)) = query.single_mut() {
         if keyboard_input.pressed(KeyCode::Space) {
-            main_character.fire(&mut commands, &mut materials, &mut time);
+            main_character.fire(&mut commands, &mut materials, time);
         }
         else {
             main_character.reload_weapon();

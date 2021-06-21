@@ -79,7 +79,7 @@ pub trait Weapon {
     fn fire_global(&mut self,
         commands: &mut Commands,
         materials: &mut ResMut<Assets<ColorMaterial>>,
-        time: &mut ResMut<Time>,
+        time: Res<Time>,
         direction: (f32, f32),
         initial_pos: (f32, f32)) {
 
@@ -138,17 +138,19 @@ impl Weapon for Pistol {
     fn new() -> Self {
         Pistol {speed: 500.0,
                 amo: 856,
-                limit_of_fire: 300,
-                initial_fire_rate: 0.5,
-                current_fire_rate_timer: 0.5}
+                limit_of_fire: 600,
+                initial_fire_rate: 0.15,
+                current_fire_rate_timer: 0.0}
     }
 
     fn reload(&mut self) {
         self.amo = 856;
     }
+
     fn get_amo(&self) -> u32 {
         self.amo
     }
+
     fn is_ready_to_fire(&mut self, time_elapsed_since_last_update: f32) -> bool {
         self.current_fire_rate_timer -= time_elapsed_since_last_update;
 
@@ -216,7 +218,7 @@ impl MainCharacter {
     pub fn fire(&mut self,
         commands: &mut Commands,
         materials: &mut ResMut<Assets<ColorMaterial>>,
-        time: &mut ResMut<Time>) {
+        time: Res<Time>) {
             self.current_weapon.fire_global(commands, materials, time, self.get_direction(), self.get_position());
     }
 
