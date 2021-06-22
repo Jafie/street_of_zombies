@@ -1,9 +1,16 @@
 pub mod main_character;
 pub mod projectiles;
+pub mod ennemies;
 
 use bevy::{
     prelude::*,
 };
+
+pub enum Collider {
+    EnnemyCollision,
+    ProjectileCollision,
+    MainCharacterCollision,
+}
 
 /// A sprite which is able to move
 pub trait MoveableSprite {
@@ -60,6 +67,17 @@ pub trait MoveableSprite {
         self.set_new_position((translated_movement.x, translated_movement.y));
         self.set_new_direction(*direction);
     }
+
+    fn reject_by_object(&mut self, collider_position: &(f32, f32), collider_size: &(f32, f32), translated_movement: &mut bevy::prelude::Vec3) {
+
+        // move the sprite
+        translated_movement.x = 200.0;
+
+        translated_movement.y = 200.0;
+
+        self.set_new_position((translated_movement.x, translated_movement.y));
+    }
+
     /// Get the generic name of the sprite
     fn get_sprite_name() -> String;
 }
