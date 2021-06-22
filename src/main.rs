@@ -1,5 +1,11 @@
 mod moveable_sprites;
-use crate::moveable_sprites::MoveableSprite;
+mod weapons;
+
+use bevy::{
+    prelude::*,
+};
+
+use crate::moveable_sprites::*;
 
 
 // Game area limit
@@ -13,9 +19,6 @@ static INITIAL_POST_MAIN_CHAR_Y: f32 = -215.0;
 static INITIAL_SPEED_MAIN_CHAR: f32 = 200.0;
 static INITIAL_DIRECTION_MAIN_CHAR: (f32, f32) = (0.0, 1.0);
 
-use bevy::{
-    prelude::*,
-};
 
 
 fn main() {
@@ -52,7 +55,7 @@ fn setup(
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
-        .insert(moveable_sprites::MainCharacter::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POST_MAIN_CHAR_X, INITIAL_POST_MAIN_CHAR_Y)));
+        .insert(moveable_sprites::main_character::MainCharacter::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POST_MAIN_CHAR_X, INITIAL_POST_MAIN_CHAR_Y)));
 }
 
 /// This system will then change the title during execution
@@ -65,7 +68,7 @@ fn set_window_title(mut windows: ResMut<Windows>) {
 fn keyboard_capture(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut moveable_sprites::MainCharacter, &mut Transform)>,
+    mut query: Query<(&mut moveable_sprites::main_character::MainCharacter, &mut Transform)>,
 ) {
     if let Ok((mut main_character, mut transform)) = query.single_mut() {
         let mut direction : (f32, f32) = (0.0, 0.0);
@@ -107,7 +110,7 @@ fn fire_capture(
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut moveable_sprites::MainCharacter, &mut Transform)>,
+    mut query: Query<(&mut moveable_sprites::main_character::MainCharacter, &mut Transform)>,
 ) {
     if let Ok((mut main_character, _)) = query.single_mut() {
         if keyboard_input.pressed(KeyCode::Space) {
@@ -123,7 +126,7 @@ fn fire_capture(
 fn projectile_movement_system(
     mut commands: Commands,
     time: Res<Time>,
-    mut projectile_query: Query<(&mut moveable_sprites::Projectile,
+    mut projectile_query: Query<(&mut moveable_sprites::projectiles::Projectile,
     &mut Transform, Entity)>) {
 
     for projectile_single_query in projectile_query.iter_mut() {
