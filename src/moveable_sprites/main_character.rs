@@ -1,9 +1,11 @@
 use crate::moveable_sprites::MoveableSprite;
+use crate::moveable_sprites::ennemies::Ennemy;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
 use bevy::{
     prelude::*,
+    sprite::collide_aabb::{collide},
 };
 
 
@@ -59,12 +61,14 @@ pub fn keyboard_capture(
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut MainCharacter, &mut Transform)>
+    mut query: Query<(&mut MainCharacter, &mut Transform, &Sprite)>,
+    query_ennemy: Query<(&Ennemy, &Sprite)>
 ) {
-    if let Ok((mut main_character, mut transform)) = query.single_mut() {
+    if let Ok((mut main_character, mut transform, main_char_sprite)) = query.single_mut() {
         let mut direction : (f32, f32) = (0.0, 0.0);
         let mut number_of_valid_pressure : u8 = 0;
-
+        let saved_position = (transform.translation.x, transform.translation.y);
+    
         // Fire capture
         if keyboard_input.pressed(KeyCode::Space) {
             main_character.fire(&mut commands, &mut materials, &time);
@@ -99,6 +103,34 @@ pub fn keyboard_capture(
                 direction.1 = direction.1 / 1.5;
             }
         }
+
+
         main_character.move_sprite(&time, &direction, &mut transform.translation);
+
+        // Block the movement if a collision with an object is detected
+        if is_next_movement_collide_with_blockable_object(&query_ennemy, &transform, &main_char_sprite) {
+            transform.translation.x = saved_position.0;
+            transform.translation.y = saved_position.1;
+        }
     }
+}
+
+fn is_next_movement_collide_with_blockable_object(query_ennemy: &Query<(&Ennemy, &Sprite)>, movement: &Transform, main_char_sprite: &Sprite) -> bool {
+    for (ennemy, sprite) in query_ennemy.iter() {
+
+           let ennemy_position : bevy::prelude::Vec3 = bevy::prelude::Vec3::new(ennemy.get_position().0, ennemy.get_position().1, 0.0);
+
+           let collision = collide(
+                movement.translation,
+                main_char_sprite.size,
+                ennemy_position,
+                sprite.size,
+            );
+
+            if let Some(_) = collision {
+                    return true;
+            }
+    }
+
+    false
 }

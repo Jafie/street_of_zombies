@@ -1,7 +1,6 @@
 pub mod pistol;
 
 use crate::moveable_sprites::projectiles::Projectile;
-use crate::moveable_sprites::Collider;
 
 use bevy::{
     prelude::*,
@@ -52,8 +51,7 @@ pub trait Weapon {
                 sprite: Sprite::new(Vec2::new(5.0, 5.0)),
                 ..Default::default()
             })
-            .insert(self.create_projectile(direction, initial_pos))
-            .insert(Collider::ProjectileCollision);
+            .insert(self.create_projectile(direction, initial_pos));
             self.reduce_amo();
         }
 

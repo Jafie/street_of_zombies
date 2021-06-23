@@ -2,7 +2,7 @@ use crate::moveable_sprites::MoveableSprite;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
-/// The Main Character. Controllable by the player.
+/// The Ennemy
 pub struct Ennemy {
     speed: f32,
     current_position : (f32, f32),

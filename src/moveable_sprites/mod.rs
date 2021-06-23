@@ -7,12 +7,6 @@ use bevy::{
 };
 
 
-pub enum Collider {
-    EnnemyCollision,
-    ProjectileCollision,
-    MainCharacterCollision,
-}
-
 /// A sprite which is able to move
 pub trait MoveableSprite {
     /// Get the current move speed of a moveable sprite in the game area

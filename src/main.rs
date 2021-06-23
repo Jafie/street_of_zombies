@@ -61,9 +61,7 @@ fn setup(
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
-        .insert(moveable_sprites::main_character::MainCharacter::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POS_MAIN_CHAR_X, INITIAL_POS_MAIN_CHAR_Y)))
-        .insert(Collider::MainCharacterCollision);
-
+        .insert(moveable_sprites::main_character::MainCharacter::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POS_MAIN_CHAR_X, INITIAL_POS_MAIN_CHAR_Y)));
     // Ennemy
     commands
     .spawn_bundle(SpriteBundle {
@@ -72,9 +70,7 @@ fn setup(
         sprite: Sprite::new(Vec2::new(30.0, 30.0)),
         ..Default::default()
     })
-    .insert(moveable_sprites::ennemies::Ennemy::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POS_ENN_CHAR_X, INITIAL_POS_ENN_CHAR_Y)))
-    .insert(Collider::EnnemyCollision);
-
+    .insert(moveable_sprites::ennemies::Ennemy::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POS_ENN_CHAR_X, INITIAL_POS_ENN_CHAR_Y)));
 }
 
 /// This system will then change the title during execution
@@ -104,15 +100,18 @@ fn projectile_movement_system(
 
 fn projectile_collision_system(
     mut commands: Commands,
-    mut ennemy_query: Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite)>,
-    collider_query: Query<(Entity, &Collider, &Transform, &Sprite)>,
+    mut query_set: QuerySet<(
+        Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite)>,
+        Query<(&mut moveable_sprites::main_character::MainCharacter, &Transform, &Sprite)>
+    )>,
+    projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
 ) 
 {
-    for (_, ennemy_transform, sprite) in ennemy_query.iter_mut() {
+    for (_, ennemy_transform, sprite) in query_set.q0_mut().iter_mut() {
         let ennemy_size = sprite.size;
 
         // check collision with objects
-        for (collider_entity, collider, transform, sprite) in collider_query.iter() {
+        for (collider_entity, _, transform, sprite) in projectile_query.iter() {
             let collision = collide(
                 ennemy_transform.translation,
                 ennemy_size,
@@ -121,10 +120,7 @@ fn projectile_collision_system(
             );
 
             if let Some(_) = collision {
-                // Check if the ennemy encounter a projectile
-                if let Collider::ProjectileCollision = *collider {
                     commands.entity(collider_entity).despawn();
-                }
             }
         }
     }
