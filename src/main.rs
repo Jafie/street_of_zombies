@@ -101,13 +101,13 @@ fn projectile_movement_system(
 fn projectile_collision_system(
     mut commands: Commands,
     mut query_set: QuerySet<(
-        Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite)>,
-        Query<(&mut moveable_sprites::main_character::MainCharacter, &Transform, &Sprite)>
+        Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite, Entity)>,
+        Query<(&mut moveable_sprites::main_character::MainCharacter, &Transform, &Sprite, Entity)>
     )>,
     projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
 ) 
 {
-    for (_, ennemy_transform, sprite) in query_set.q0_mut().iter_mut() {
+    for (mut ennemy, ennemy_transform, sprite, entity_ennemy) in query_set.q0_mut().iter_mut() {
         let ennemy_size = sprite.size;
 
         // check collision with objects
@@ -121,7 +121,15 @@ fn projectile_collision_system(
 
             if let Some(_) = collision {
                     commands.entity(collider_entity).despawn();
+                    ennemy.reduce_life();
+                    check_and_treat_ennemy_life(&mut commands, &mut ennemy, entity_ennemy);
             }
         }
+    }
+}
+
+fn check_and_treat_ennemy_life(commands: &mut Commands, ennemy: &mut moveable_sprites::ennemies::Ennemy, entity: Entity) {
+    if ennemy.is_dead() {
+        commands.entity(entity).despawn();
     }
 }

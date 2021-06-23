@@ -7,6 +7,7 @@ pub struct Ennemy {
     speed: f32,
     current_position : (f32, f32),
     direction: (f32, f32),
+    life: i32,
     _current_weapon: Box<dyn Weapon + Send + Sync>
 }
 
@@ -34,6 +35,16 @@ impl Ennemy {
              speed: speed_to_set,
              current_position: initial_pos,
              direction: direction_to_set,
+             life: 30,
              _current_weapon: Box::new(Pistol::new())}
+    }
+
+    pub fn reduce_life(&mut self) {
+        self.life -= 1;
+        println!("HIT! Ennemy life = {}", self.life);
+    }
+
+    pub fn is_dead(&self) -> bool{
+        self.life < 0
     }
 }
