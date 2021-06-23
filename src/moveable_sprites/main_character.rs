@@ -6,6 +6,7 @@ use bevy::{
     prelude::*,
 };
 
+
 /// The Main Character. Controllable by the player.
 pub struct MainCharacter {
     speed: f32,
@@ -30,9 +31,6 @@ impl MoveableSprite for MainCharacter {
     fn set_new_position(&mut self, position: (f32, f32)) {
         self.current_position = position;
     }
-    fn get_sprite_name() -> String {
-        String::from("Josay")
-    }
 }
 
 impl MainCharacter {
@@ -47,8 +45,8 @@ impl MainCharacter {
     pub fn fire(&mut self,
         commands: &mut Commands,
         materials: &mut ResMut<Assets<ColorMaterial>>,
-        time: Res<Time>) {
-            self.current_weapon.fire_global(commands, materials, time, self.get_direction(), self.get_position());
+        time: &Res<Time>) {
+            self.current_weapon.fire_global(commands, materials, &time, self.get_direction(), self.get_position());
     }
 
     pub fn reload_weapon(&mut self) {
@@ -57,14 +55,25 @@ impl MainCharacter {
 }
 
 pub fn keyboard_capture(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut MainCharacter, &mut Transform)>,
+    mut query: Query<(&mut MainCharacter, &mut Transform)>
 ) {
     if let Ok((mut main_character, mut transform)) = query.single_mut() {
         let mut direction : (f32, f32) = (0.0, 0.0);
         let mut number_of_valid_pressure : u8 = 0;
 
+        // Fire capture
+        if keyboard_input.pressed(KeyCode::Space) {
+            main_character.fire(&mut commands, &mut materials, &time);
+        }
+        else {
+            main_character.reload_weapon();
+        }
+
+        // Movement        
         if keyboard_input.pressed(KeyCode::Left) {
             direction.0 -= 1.0;
             number_of_valid_pressure += 1;
@@ -82,7 +91,6 @@ pub fn keyboard_capture(
             number_of_valid_pressure += 1;
         }
 
-
         match number_of_valid_pressure {
             0 => return,
             1 => (),
@@ -91,24 +99,6 @@ pub fn keyboard_capture(
                 direction.1 = direction.1 / 1.5;
             }
         }
-
         main_character.move_sprite(&time, &direction, &mut transform.translation);
-    }
-}
-
-pub fn fire_capture(
-    mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    time: Res<Time>,
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut MainCharacter, &mut Transform)>,
-) {
-    if let Ok((mut main_character, _)) = query.single_mut() {
-        if keyboard_input.pressed(KeyCode::Space) {
-            main_character.fire(&mut commands, &mut materials, time);
-        }
-        else {
-            main_character.reload_weapon();
-        }
     }
 }

@@ -2,16 +2,12 @@ use crate::moveable_sprites::MoveableSprite;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
-use bevy::{
-    prelude::*,
-};
-
 /// The Main Character. Controllable by the player.
 pub struct Ennemy {
     speed: f32,
     current_position : (f32, f32),
     direction: (f32, f32),
-    current_weapon: Box<dyn Weapon + Send + Sync>
+    _current_weapon: Box<dyn Weapon + Send + Sync>
 }
 
 impl MoveableSprite for Ennemy {
@@ -30,9 +26,6 @@ impl MoveableSprite for Ennemy {
     fn set_new_position(&mut self, position: (f32, f32)) {
         self.current_position = position;
     }
-    fn get_sprite_name() -> String {
-        String::from("Ennemy")
-    }
 }
 
 impl Ennemy {
@@ -41,17 +34,6 @@ impl Ennemy {
              speed: speed_to_set,
              current_position: initial_pos,
              direction: direction_to_set,
-             current_weapon: Box::new(Pistol::new())}
-    }
-
-    pub fn fire(&mut self,
-        commands: &mut Commands,
-        materials: &mut ResMut<Assets<ColorMaterial>>,
-        time: Res<Time>) {
-            self.current_weapon.fire_global(commands, materials, time, self.get_direction(), self.get_position());
-    }
-
-    pub fn reload_weapon(&mut self) {
-        self.current_weapon.reload();
+             _current_weapon: Box::new(Pistol::new())}
     }
 }

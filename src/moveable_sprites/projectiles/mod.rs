@@ -1,4 +1,5 @@
 use crate::moveable_sprites::MoveableSprite;
+use crate::math_cartesian;
 
 pub struct Projectile {
     speed: f32,
@@ -21,14 +22,9 @@ impl Projectile {
 
     /// Return true if the Projectile browsed more than the "projectile_limit_distance"
     pub fn is_out_of_distance(&self) -> bool {
-        let (initial_pos_x, initial_pos_y) = self.initial_position;
-        let (current_pos_x, current_pos_y) = self.current_position;
+        let distance_walked = math_cartesian::calculate_cartesian_distance(self.initial_position, self.current_position);
 
-        let position_diff_x = (current_pos_x - initial_pos_x) as i32;
-        let position_diff_y = (current_pos_y - initial_pos_y) as i32;
-        let distance_walked_squared = (position_diff_x.pow(2) + position_diff_y.pow(2)) as u32;
-
-        let result = distance_walked_squared > self.projectile_limit_distance.pow(2);
+        let result = distance_walked > self.projectile_limit_distance.pow(2);
         result
     }
 }
@@ -48,8 +44,5 @@ impl MoveableSprite for Projectile {
     }
     fn set_new_position(&mut self, position: (f32, f32)) {
         self.current_position = position;
-    }
-    fn get_sprite_name() -> String {
-        String::from("Amo")
     }
 }

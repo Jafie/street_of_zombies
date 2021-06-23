@@ -1,9 +1,10 @@
 mod moveable_sprites;
 mod weapons;
+mod math_cartesian;
 
 use bevy::{
     prelude::*,
-    sprite::collide_aabb::{collide, Collision},
+    sprite::collide_aabb::{collide},
 };
 
 use crate::moveable_sprites::*;
@@ -38,8 +39,7 @@ fn main() {
         .add_startup_system(set_window_title.system())
         .add_system(main_character::keyboard_capture.system())
         .add_system(projectile_movement_system.system())
-        .add_system(main_character::fire_capture.system())
-        .add_system(ennemy_collision_system.system())
+        .add_system(projectile_collision_system.system())
         .run();
 }
 
@@ -51,6 +51,7 @@ fn setup(
     // cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
+
 
     // Main character
     commands
@@ -101,13 +102,13 @@ fn projectile_movement_system(
     }
 }
 
-fn ennemy_collision_system(
+fn projectile_collision_system(
     mut commands: Commands,
     mut ennemy_query: Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite)>,
     collider_query: Query<(Entity, &Collider, &Transform, &Sprite)>,
-) {
-
-    if let Ok((mut ennemy, ennemy_transform, sprite)) = ennemy_query.single_mut() {
+) 
+{
+    for (_, ennemy_transform, sprite) in ennemy_query.iter_mut() {
         let ennemy_size = sprite.size;
 
         // check collision with objects
@@ -119,7 +120,7 @@ fn ennemy_collision_system(
                 sprite.size,
             );
 
-            if let Some(collision) = collision {
+            if let Some(_) = collision {
                 // Check if the ennemy encounter a projectile
                 if let Collider::ProjectileCollision = *collider {
                     commands.entity(collider_entity).despawn();
