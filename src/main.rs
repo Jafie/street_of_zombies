@@ -40,6 +40,7 @@ fn main() {
         .add_system(main_character::keyboard_capture.system())
         .add_system(projectile_movement_system.system())
         .add_system(projectile_collision_system.system())
+        .add_system(ennemy_ai_system.system())
         .run();
 }
 
@@ -97,6 +98,16 @@ fn projectile_movement_system(
         }
     }
 }
+
+// Ennemy AI system
+fn ennemy_ai_system(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut projectile_query: Query<(&mut moveable_sprites::ennemies::Ennemy, &mut Transform)>) {
+
+
+}
+
 
 fn projectile_collision_system(
     mut commands: Commands,

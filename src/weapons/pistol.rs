@@ -3,10 +3,10 @@ use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
 // Pistol data
-static PROJECTILE_SPEED: f32 = 500.0;
+static PROJECTILE_SPEED: f32 = 600.0;
 static AMO_IN_WEAPON: u32 = 10;
-static LIMIT_OF_FIRE: u32 = 600;
-static FIRE_RATE: f32 = 0.1;
+static LIMIT_OF_FIRE: u32 = 450;
+static FIRE_RATE: f32 = 0.05;
 
 
 impl Weapon for Pistol {

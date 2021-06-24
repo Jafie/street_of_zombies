@@ -45,6 +45,6 @@ impl Ennemy {
     }
 
     pub fn is_dead(&self) -> bool{
-        self.life < 0
+        self.life < 1
     }
 }
