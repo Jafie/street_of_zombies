@@ -21,6 +21,8 @@ static INITIAL_POS_MAIN_CHAR_Y: f32 = -215.0;
 
 static INITIAL_POS_ENN_CHAR_X: f32 = 0.0;
 static INITIAL_POS_ENN_CHAR_Y: f32 = 215.0;
+static INITIAL_SPEED_ENN_CHAR: f32 = 100.0;
+static INITIAL_DIRECTION_ENN_CHAR: (f32, f32) = (1.0, 0.0);
 
 static INITIAL_SPEED_MAIN_CHAR: f32 = 200.0;
 static INITIAL_DIRECTION_MAIN_CHAR: (f32, f32) = (0.0, 1.0);
@@ -71,7 +73,7 @@ fn setup(
         sprite: Sprite::new(Vec2::new(30.0, 30.0)),
         ..Default::default()
     })
-    .insert(moveable_sprites::ennemies::Ennemy::new(INITIAL_SPEED_MAIN_CHAR, INITIAL_DIRECTION_MAIN_CHAR, (INITIAL_POS_ENN_CHAR_X, INITIAL_POS_ENN_CHAR_Y)));
+    .insert(moveable_sprites::ennemies::Ennemy::new(INITIAL_SPEED_ENN_CHAR, INITIAL_DIRECTION_ENN_CHAR, (INITIAL_POS_ENN_CHAR_X, INITIAL_POS_ENN_CHAR_Y)));
 }
 
 /// This system will then change the title during execution
@@ -101,11 +103,13 @@ fn projectile_movement_system(
 
 // Ennemy AI system
 fn ennemy_ai_system(
-    mut commands: Commands,
     time: Res<Time>,
-    mut projectile_query: Query<(&mut moveable_sprites::ennemies::Ennemy, &mut Transform)>) {
+    mut ennemy_query: Query<(&mut moveable_sprites::ennemies::Ennemy, &mut Transform)>) {
 
-
+        for (mut ennemy, mut ennemy_transform) in ennemy_query.iter_mut() {
+            let ennemy_direction = ennemy.get_direction();
+            ennemy.move_sprite(&time, &ennemy_direction, &mut ennemy_transform.translation);
+    }
 }
 
 

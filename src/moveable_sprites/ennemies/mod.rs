@@ -44,7 +44,7 @@ impl Ennemy {
         println!("HIT! Ennemy life = {}", self.life);
     }
 
-    pub fn is_dead(&self) -> bool{
+    pub fn is_dead(&self) -> bool {
         self.life < 1
     }
 }
