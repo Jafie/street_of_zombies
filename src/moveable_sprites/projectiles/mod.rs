@@ -24,7 +24,7 @@ impl Projectile {
     pub fn is_out_of_distance(&self) -> bool {
         let distance_walked = math_cartesian::calculate_cartesian_distance(self.initial_position, self.current_position);
 
-        let result = distance_walked > self.projectile_limit_distance.pow(2);
+        let result = distance_walked > (self.projectile_limit_distance as f32);
         result
     }
 }
