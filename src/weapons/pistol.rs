@@ -41,7 +41,7 @@ impl Weapon for Pistol {
         self.amo -= 1;
     }
 
-    fn create_projectile(&self, direction_to_set: (f32, f32), initial_position_to_set: (f32, f32)) -> Projectile {
-        Projectile::new(self.speed, direction_to_set, initial_position_to_set, self.limit_of_fire)
+    fn create_projectile(&self, direction_to_set: (f32, f32), initial_position_to_set: (f32, f32), is_ennemy: bool) -> Projectile {
+        Projectile::new(self.speed, direction_to_set, initial_position_to_set, self.limit_of_fire, is_ennemy)
     }
 }

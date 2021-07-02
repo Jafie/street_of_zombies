@@ -7,6 +7,7 @@ use bevy::{
 };
 
 
+
 /// A Pistol is a "Weapon", single fire
 pub struct Pistol {
     /// Speed of the projectile
@@ -40,23 +41,42 @@ pub trait Weapon {
         materials: &mut ResMut<Assets<ColorMaterial>>,
         time: &Res<Time>,
         direction: (f32, f32),
-        initial_pos: (f32, f32)) {
+        initial_pos: (f32, f32),
+        is_ennemy: bool) {
 
-            if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_seconds()){
-            let (pos_x, pox_y) = initial_pos;
-            commands
-            .spawn_bundle(SpriteBundle {
-                material: materials.add(Color::rgb(0.3, 0.0, 1.0).into()),
-                transform: Transform::from_xyz(pos_x, pox_y, 0.0),
-                sprite: Sprite::new(Vec2::new(5.0, 5.0)),
-                ..Default::default()
-            })
-            .insert(self.create_projectile(direction, initial_pos));
-            self.reduce_amo();
+            if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_seconds()) {
+                self.fire_with_weapon(commands, materials, direction, initial_pos, is_ennemy);
+                self.reduce_amo();
         }
 
     }
 
+    fn fire_with_weapon(&mut self,
+        commands: &mut Commands,
+        materials: &mut ResMut<Assets<ColorMaterial>>,
+        direction: (f32, f32),
+        initial_pos: (f32, f32),
+        is_ennemy: bool) {
+            let (pos_x, pox_y) = initial_pos;
+            let asset_color;
+            if is_ennemy {
+                asset_color = Color::rgb(1.0, 0.0, 0.3).into();
+            }
+            else {
+                asset_color = Color::rgb(0.3, 0.0, 1.0).into();
+            }
+
+            commands
+            .spawn_bundle(SpriteBundle {
+                material: materials.add(asset_color),
+                transform: Transform::from_xyz(pos_x, pox_y, 0.0),
+                sprite: Sprite::new(Vec2::new(5.0, 5.0)),
+                ..Default::default()
+            })
+            .insert(self.create_projectile(direction, initial_pos, is_ennemy));
+        }
+
+        
     /// Method to reload the weapon amo.
     fn reload(&mut self);
 
@@ -76,5 +96,5 @@ pub trait Weapon {
     /// * `direction_to_set` - The direction of the projectile
     /// * `initial_position_to_set` - The initial position of the projectile
     ///
-    fn create_projectile(&self, direction_to_set: (f32, f32), initial_position_to_set: (f32, f32)) -> Projectile;
+    fn create_projectile(&self, direction_to_set: (f32, f32), initial_position_to_set: (f32, f32), is_ennemy: bool) -> Projectile;
 }

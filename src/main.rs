@@ -103,6 +103,8 @@ fn projectile_movement_system(
 
 // Ennemy AI system
 fn ennemy_ai_system(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     mut ennemy_query: Query<(&mut moveable_sprites::ennemies::Ennemy, &mut Transform)>) {
 
@@ -115,6 +117,8 @@ fn ennemy_ai_system(
             ennemy.set_new_direction((-ennemy_direction.0, -ennemy_direction.1));
         }
 
+        // Attack
+        ennemy.launch_attack(&mut commands, &mut materials, &time)
     }
 }
 
@@ -127,24 +131,62 @@ fn projectile_collision_system(
     )>,
     projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
 ) 
-{
-    for (mut ennemy, ennemy_transform, sprite, entity_ennemy) in query_set.q0_mut().iter_mut() {
+{ 
+
+    // check collision with objects
+    for (collider_entity, projectile, transform, sprite) in projectile_query.iter() {
+        if projectile.is_coming_from_ennemy() {
+            check_collision_with_player(&mut commands, &mut query_set.q1_mut(), sprite, &collider_entity, transform);
+        }
+        else {
+            check_collision_with_ennemy(&mut commands, &mut query_set.q0_mut(), sprite, &collider_entity, transform);
+        }
+
+    }
+
+
+}
+
+fn check_collision_with_ennemy(
+    commands: &mut Commands,
+    entity_query: &mut Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite, Entity)>,
+    projectile_sprite: &Sprite,
+    projectile_entity: &Entity,
+    projectile_transform: &Transform) {
+    
+    for (mut ennemy, ennemy_transform, sprite, entity_ennemy) in entity_query.iter_mut() {
         let ennemy_size = sprite.size;
+        let collision = collide(
+            ennemy_transform.translation,
+            ennemy_size,
+            projectile_transform.translation,
+            projectile_sprite.size,
+        );
+        if let Some(_) = collision {
+                commands.entity(*projectile_entity).despawn();
+                ennemy.reduce_life();
+                check_and_treat_ennemy_life(commands, &mut ennemy, entity_ennemy);
+        }
+    }
+}
 
-        // check collision with objects
-        for (collider_entity, _, transform, sprite) in projectile_query.iter() {
-            let collision = collide(
-                ennemy_transform.translation,
-                ennemy_size,
-                transform.translation,
-                sprite.size,
-            );
-
-            if let Some(_) = collision {
-                    commands.entity(collider_entity).despawn();
-                    ennemy.reduce_life();
-                    check_and_treat_ennemy_life(&mut commands, &mut ennemy, entity_ennemy);
-            }
+fn check_collision_with_player(
+    commands: &mut Commands,
+    entity_query: &mut Query<(&mut moveable_sprites::main_character::MainCharacter, &Transform, &Sprite, Entity)>,
+    projectile_sprite: &Sprite,
+    projectile_entity: &Entity,
+    projectile_transform: &Transform) {
+    
+    for (_, player_transform, sprite, _) in entity_query.iter_mut() {
+        let player_size = sprite.size;
+        let collision = collide(
+            player_transform.translation,
+            player_size,
+            projectile_transform.translation,
+            projectile_sprite.size,
+        );
+        if let Some(_) = collision {
+                commands.entity(*projectile_entity).despawn();
         }
     }
 }

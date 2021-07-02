@@ -2,13 +2,20 @@ use crate::moveable_sprites::MoveableSprite;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
+use bevy::{
+    prelude::*
+};
+
 /// The Ennemy
 pub struct Ennemy {
     speed: f32,
     current_position : (f32, f32),
-    direction: (f32, f32),
+    move_direction: (f32, f32),
+    fire_direction: (f32, f32),
     life: i32,
-    _current_weapon: Box<dyn Weapon + Send + Sync>
+    current_weapon: Box<dyn Weapon + Send + Sync>,
+    tick_elapsed: f32,
+    cooldown_tick: f32
 }
 
 impl MoveableSprite for Ennemy {
@@ -16,10 +23,10 @@ impl MoveableSprite for Ennemy {
         self.speed
     }
     fn set_new_direction(&mut self, direction: (f32, f32)) {
-        self.direction = direction;
+        self.move_direction = direction;
     }
     fn get_direction(&self) -> (f32, f32) {
-        self.direction
+        self.move_direction
     }
     fn get_position(&self) -> (f32, f32) {
         self.current_position
@@ -34,9 +41,12 @@ impl Ennemy {
         Ennemy {
              speed: speed_to_set,
              current_position: initial_pos,
-             direction: direction_to_set,
+             move_direction: direction_to_set,
+             fire_direction: (0.0, -1.0),
              life: 30,
-             _current_weapon: Box::new(Pistol::new())}
+             current_weapon: Box::new(Pistol::new()),
+             tick_elapsed: 0.,
+             cooldown_tick: 2.0}
     }
 
     pub fn reduce_life(&mut self) {
@@ -46,5 +56,18 @@ impl Ennemy {
 
     pub fn is_dead(&self) -> bool {
         self.life < 1
+    }
+
+    pub fn launch_attack(&mut self,
+        commands: &mut Commands,
+        materials: &mut ResMut<Assets<ColorMaterial>>,
+        time: &Res<Time>) {
+            self.current_weapon.fire_global(commands, materials, &time, self.fire_direction, self.get_position(), true);
+
+            self.tick_elapsed += time.delta_seconds();
+
+            if self.tick_elapsed > self.cooldown_tick {
+                self.current_weapon.reload();
+            }
     }
 }

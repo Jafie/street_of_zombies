@@ -48,7 +48,7 @@ impl MainCharacter {
         commands: &mut Commands,
         materials: &mut ResMut<Assets<ColorMaterial>>,
         time: &Res<Time>) {
-            self.current_weapon.fire_global(commands, materials, &time, self.get_direction(), self.get_position());
+            self.current_weapon.fire_global(commands, materials, &time, self.get_direction(), self.get_position(), false);
     }
 
     pub fn reload_weapon(&mut self) {
