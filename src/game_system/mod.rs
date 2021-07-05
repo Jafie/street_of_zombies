@@ -1,13 +1,19 @@
 pub mod math_cartesian;
 
+use crate::game_entity::*;
+
+use rand::Rng;
 use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide}
 };
 
-use crate::game_entity::*;
 
 static MAXIMUM_ENNEMY_DISTANCE: f32 = 300.;
+static INITIAL_ENNEMY_SPEED: f32 = 200.0;
+// One spawn about each 10 seconds
+static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 650;
+
 
 /// Game System: Automatic movement of the projectiles.
 pub fn projectile_movement_system(
@@ -35,6 +41,7 @@ pub fn ennemy_ai_system(
     time: Res<Time>,
     mut ennemy_query: Query<(&mut ennemies::Ennemy, &mut Transform)>) {
         movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
+        ennemy_spawn_system(&mut commands, &mut materials);
 }
 
 /// Game System: The collision system with projectiles.
@@ -132,12 +139,44 @@ fn movement_of_ennemies(
         }
 }
 
-/*fn ennemy_spawn(
+fn ennemy_spawn_system(
     commands: &mut Commands,
-    materials: &mut ResMut<Assets<ColorMaterial>>,
-    time: &Res<Time>) {
+    materials: &mut ResMut<Assets<ColorMaterial>>) 
+{
+    let mut rng = rand::thread_rng();
+    let rand_system = rng.gen_range(0..SPAWN_FACTOR_CLASSIC_ENNEMY);
 
-}*/
+    
+    if rand_system == 1 {
+        generate_new_ennemy(commands, materials);
+    }
+}
+
+fn generate_new_ennemy(
+    commands: &mut Commands,
+    materials: &mut ResMut<Assets<ColorMaterial>>,) {
+
+    let mut rng = rand::thread_rng();
+
+    let ennemy_initial_position: (f32, f32) = (rng.gen_range(-300.0..300.0), rng.gen_range(-300.0..300.0));
+    let ennemy_initial_direction: (f32, f32) = (rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0));
+    let ennemy_fire_direction: (f32, f32) = (rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0));
+
+    // Ennemy
+    commands
+    .spawn_bundle(SpriteBundle {
+        material: materials.add(Color::rgb(1.0, 0.0, 0.3).into()),
+        transform: Transform::from_xyz(ennemy_initial_position.0, ennemy_initial_position.1, 0.0),
+        sprite: Sprite::new(Vec2::new(30.0, 30.0)),
+        ..Default::default()
+    })
+    .insert(ennemies::Ennemy::new(
+        INITIAL_ENNEMY_SPEED,
+        ennemy_initial_direction,
+        ennemy_initial_position,
+        ennemy_fire_direction)
+    );
+}
 
 fn check_collision_with_ennemy(
     commands: &mut Commands,

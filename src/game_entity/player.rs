@@ -7,7 +7,7 @@ use bevy::{
 };
 
 // Default pistol weapon data
-static PROJECTILE_SPEED: f32 = 500.0;
+static PROJECTILE_SPEED: f32 = 600.0;
 static AMO_IN_WEAPON: u32 = 10;
 static LIMIT_OF_FIRE: u32 = 500;
 static FIRE_RATE: f32 = 0.2;

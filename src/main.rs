@@ -6,25 +6,18 @@ use bevy::{
     prelude::*
 };
 
-
 use crate::game_system::*;
 
 
 // Game area limit
-static GAME_AREA_LIMIT_X: f32 = 500.0;
-static GAME_AREA_LIMIT_Y: f32 = 300.0;
-
+static GAME_AREA_LIMIT_X: f32 = 800.0;
+static GAME_AREA_LIMIT_Y: f32 = 600.0;
 
 // Main character initialization
 static INITIAL_PLAYER_POSITION: f32 = 0.0;
 static INITIAL_PLAYER_POSITION_Y: f32 = -215.0;
 static INITIAL_PLAYER_SPEED: f32 = 200.0;
 static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
-
-static INITIAL_ENNEMY_POSITION_X: f32 = 0.0;
-static INITIAL_ENNEMY_POSITION_Y: f32 = 215.0;
-static INITIAL_ENNEMY_SPEED: f32 = 200.0;
-static INITIAL_ENNEMY_DIRECTION: (f32, f32) = (1.0, 0.0);
 
 
 fn main() {
@@ -64,15 +57,6 @@ fn setup(
             ..Default::default()
         })
         .insert(game_entity::player::Player::new(INITIAL_PLAYER_SPEED, INITIAL_PLAYER_DIRECTION, (INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y)));
-    // Ennemy
-    commands
-    .spawn_bundle(SpriteBundle {
-        material: materials.add(Color::rgb(1.0, 0.0, 0.3).into()),
-        transform: Transform::from_xyz(INITIAL_ENNEMY_POSITION_X, INITIAL_ENNEMY_POSITION_Y, 0.0),
-        sprite: Sprite::new(Vec2::new(30.0, 30.0)),
-        ..Default::default()
-    })
-    .insert(game_entity::ennemies::Ennemy::new(INITIAL_ENNEMY_SPEED, INITIAL_ENNEMY_DIRECTION, (INITIAL_ENNEMY_POSITION_X, INITIAL_ENNEMY_POSITION_Y)));
 }
 
 /// This system will then change the title during execution

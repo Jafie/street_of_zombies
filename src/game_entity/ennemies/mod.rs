@@ -11,6 +11,7 @@ static PROJECTILE_SPEED: f32 = 500.0;
 static AMO_IN_WEAPON: u32 = 3;
 static LIMIT_OF_FIRE: u32 = 500;
 static FIRE_RATE: f32 = 0.2;
+static NUMBER_OF_LIFE: i32 = 3;
 
 /// The Ennemy
 pub struct Ennemy {
@@ -44,14 +45,14 @@ impl MoveableSprite for Ennemy {
 }
 
 impl Ennemy {
-    pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32)) -> Self {
+    pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32), fire_direction: (f32, f32)) -> Self {
         Ennemy {
              speed: speed_to_set,
              initial_position: initial_pos,
              current_position: initial_pos,
              move_direction: direction_to_set,
-             fire_direction: (0.0, -1.0),
-             life: 30,
+             fire_direction: fire_direction,
+             life: NUMBER_OF_LIFE,
              current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
              tick_elapsed: 0.,
              cooldown_tick: 2.0}

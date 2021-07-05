@@ -17,12 +17,12 @@ With Rust installed, a simple "cargo run" is necessary to run the game.
 - [x] Diagonal movements.
 - [ ] Soundtrack.
 - [x] Ennemy movements.
-- [ ] Ennemy spawn.
+- [x] Ennemy spawn.
+- [ ] Ennemy AI.
 - [ ] Sprite usage.
 - [ ] Map limit.
 - [ ] Bonus (Change weapons and Projectile types).
 - [ ] Scoreboard + Player life.
-- [ ] Blocked by ennemy.
 
 ## Screenshots and Gameplay
 

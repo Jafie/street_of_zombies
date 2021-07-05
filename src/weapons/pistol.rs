@@ -6,7 +6,7 @@ use crate::weapons::Pistol;
 impl Weapon for Pistol {
     fn new(projectile_speed: f32, fire_rate: f32, amo: u32, fire_distance: u32) -> Self {
         Pistol {speed: projectile_speed,
-                current_amo: amo,
+                current_amo: 0,
                 max_amo: amo,
                 limit_of_fire: fire_distance,
                 initial_fire_rate: fire_rate,
