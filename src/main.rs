@@ -39,7 +39,7 @@ fn main() {
         })
         .add_startup_system(setup.system())
         .add_startup_system(set_window_title.system())
-        .add_system(main_character::keyboard_capture.system())
+        .add_system(player::keyboard_capture.system())
         .add_system(projectile_movement_system.system())
         .add_system(projectile_collision_system.system())
         .add_system(ennemy_ai_system.system())
@@ -64,7 +64,7 @@ fn setup(
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
-        .insert(moveable_sprites::main_character::MainCharacter::new(INITIAL_PLAYER_SPEED, INITIAL_PLAYER_DIRECTION, (INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y)));
+        .insert(moveable_sprites::player::Player::new(INITIAL_PLAYER_SPEED, INITIAL_PLAYER_DIRECTION, (INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y)));
     // Ennemy
     commands
     .spawn_bundle(SpriteBundle {
@@ -127,7 +127,7 @@ fn projectile_collision_system(
     mut commands: Commands,
     mut query_set: QuerySet<(
         Query<(&mut moveable_sprites::ennemies::Ennemy, &Transform, &Sprite, Entity)>,
-        Query<(&mut moveable_sprites::main_character::MainCharacter, &Transform, &Sprite, Entity)>
+        Query<(&mut moveable_sprites::player::Player, &Transform, &Sprite, Entity)>
     )>,
     projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
 ) 
@@ -172,7 +172,7 @@ fn check_collision_with_ennemy(
 
 fn check_collision_with_player(
     commands: &mut Commands,
-    entity_query: &mut Query<(&mut moveable_sprites::main_character::MainCharacter, &Transform, &Sprite, Entity)>,
+    entity_query: &mut Query<(&mut moveable_sprites::player::Player, &Transform, &Sprite, Entity)>,
     projectile_sprite: &Sprite,
     projectile_entity: &Entity,
     projectile_transform: &Transform) {
@@ -190,6 +190,7 @@ fn check_collision_with_player(
         }
     }
 }
+
 
 fn check_and_treat_ennemy_life(commands: &mut Commands, ennemy: &mut moveable_sprites::ennemies::Ennemy, entity: Entity) {
     if ennemy.is_dead() {

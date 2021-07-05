@@ -2,28 +2,23 @@ use crate::moveable_sprites::projectiles::Projectile;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
-// Pistol data
-static PROJECTILE_SPEED: f32 = 500.0;
-static AMO_IN_WEAPON: u32 = 10;
-static LIMIT_OF_FIRE: u32 = 500;
-static FIRE_RATE: f32 = 0.2;
-
 
 impl Weapon for Pistol {
-    fn new() -> Self {
-        Pistol {speed: PROJECTILE_SPEED,
-                amo: AMO_IN_WEAPON,
-                limit_of_fire: LIMIT_OF_FIRE,
-                initial_fire_rate: FIRE_RATE,
+    fn new(projectile_speed: f32, fire_rate: f32, amo: u32, fire_distance: u32) -> Self {
+        Pistol {speed: projectile_speed,
+                current_amo: amo,
+                max_amo: amo,
+                limit_of_fire: fire_distance,
+                initial_fire_rate: fire_rate,
                 current_fire_rate_timer: 0.0}
     }
 
     fn reload(&mut self) {
-        self.amo = AMO_IN_WEAPON;
+        self.current_amo = self.max_amo;
     }
 
     fn get_amo(&self) -> u32 {
-        self.amo
+        self.current_amo
     }
 
     fn is_ready_to_fire(&mut self, time_elapsed_since_last_update: f32) -> bool {
@@ -38,7 +33,7 @@ impl Weapon for Pistol {
     }
 
     fn reduce_amo(&mut self) {
-        self.amo -= 1;
+        self.current_amo -= 1;
     }
 
     fn create_projectile(&self, direction_to_set: (f32, f32), initial_position_to_set: (f32, f32), is_ennemy: bool) -> Projectile {

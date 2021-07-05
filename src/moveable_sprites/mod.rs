@@ -1,4 +1,4 @@
-pub mod main_character;
+pub mod player;
 pub mod projectiles;
 pub mod ennemies;
 

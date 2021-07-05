@@ -8,16 +8,21 @@ use bevy::{
     sprite::collide_aabb::{collide},
 };
 
+// Default pistol weapon data
+static PROJECTILE_SPEED: f32 = 500.0;
+static AMO_IN_WEAPON: u32 = 10;
+static LIMIT_OF_FIRE: u32 = 500;
+static FIRE_RATE: f32 = 0.2;
 
 /// The Main Character. Controllable by the player.
-pub struct MainCharacter {
+pub struct Player {
     speed: f32,
     current_position : (f32, f32),
     direction: (f32, f32),
     current_weapon: Box<dyn Weapon + Send + Sync>
 }
 
-impl MoveableSprite for MainCharacter {
+impl MoveableSprite for Player {
     fn get_speed(&self) -> f32 {
         self.speed
     }
@@ -35,13 +40,13 @@ impl MoveableSprite for MainCharacter {
     }
 }
 
-impl MainCharacter {
+impl Player {
     pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32)) -> Self {
-        MainCharacter {
+        Player {
              speed: speed_to_set,
              current_position: initial_pos,
              direction: direction_to_set,
-             current_weapon: Box::new(Pistol::new())}
+             current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE))}
     }
 
     pub fn fire(&mut self,
@@ -61,20 +66,20 @@ pub fn keyboard_capture(
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut MainCharacter, &mut Transform, &Sprite)>,
+    mut query: Query<(&mut Player, &mut Transform, &Sprite)>,
     query_ennemy: Query<(&Ennemy, &Sprite)>
 ) {
-    if let Ok((mut main_character, mut transform, main_char_sprite)) = query.single_mut() {
+    if let Ok((mut player, mut transform, main_char_sprite)) = query.single_mut() {
         let mut direction : (f32, f32) = (0.0, 0.0);
         let mut number_of_valid_pressure : u8 = 0;
         let saved_position = (transform.translation.x, transform.translation.y);
     
         // Fire capture
         if keyboard_input.pressed(KeyCode::Space) {
-            main_character.fire(&mut commands, &mut materials, &time);
+            player.fire(&mut commands, &mut materials, &time);
         }
         else {
-            main_character.reload_weapon();
+            player.reload_weapon();
         }
 
         // Movement        
@@ -105,7 +110,7 @@ pub fn keyboard_capture(
         }
 
 
-        main_character.move_sprite(&time, &direction, &mut transform.translation);
+        player.move_sprite(&time, &direction, &mut transform.translation);
 
         // Block the movement if a collision with an object is detected
         if is_next_movement_collide_with_blockable_object(&query_ennemy, &transform, &main_char_sprite) {

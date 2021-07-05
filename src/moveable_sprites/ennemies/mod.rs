@@ -6,6 +6,12 @@ use bevy::{
     prelude::*
 };
 
+// Default pistol weapon data
+static PROJECTILE_SPEED: f32 = 500.0;
+static AMO_IN_WEAPON: u32 = 3;
+static LIMIT_OF_FIRE: u32 = 500;
+static FIRE_RATE: f32 = 0.2;
+
 /// The Ennemy
 pub struct Ennemy {
     speed: f32,
@@ -44,7 +50,7 @@ impl Ennemy {
              move_direction: direction_to_set,
              fire_direction: (0.0, -1.0),
              life: 30,
-             current_weapon: Box::new(Pistol::new()),
+             current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
              tick_elapsed: 0.,
              cooldown_tick: 2.0}
     }
@@ -68,6 +74,7 @@ impl Ennemy {
 
             if self.tick_elapsed > self.cooldown_tick {
                 self.current_weapon.reload();
+                self.tick_elapsed = 0.;
             }
     }
 }
