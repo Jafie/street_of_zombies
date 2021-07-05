@@ -8,10 +8,8 @@ use bevy::{
 
 use crate::game_system::*;
 
-
-// Game area limit
-static GAME_AREA_LIMIT_X: f32 = 800.0;
-static GAME_AREA_LIMIT_Y: f32 = 600.0;
+static GAME_RESOLUTION_WIDTH: f32 = 1024.0;
+static GAME_RESOLUTION_HEIGHT: f32 = 720.0;
 
 // Main character initialization
 static INITIAL_PLAYER_POSITION: f32 = 0.0;
@@ -25,12 +23,12 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .insert_resource(WindowDescriptor {
             title: "street_of_zombies".to_string(),
-            width: GAME_AREA_LIMIT_X,
-            height: GAME_AREA_LIMIT_Y,
+            width: GAME_RESOLUTION_WIDTH,
+            height: GAME_RESOLUTION_HEIGHT,
             ..Default::default()
         })
         .add_startup_system(setup.system())
-        .add_startup_system(set_window_title.system())
+        .add_startup_system(set_window_parameters.system())
         .add_system(keyboard_capture.system())
         .add_system(projectile_movement_system.system())
         .add_system(projectile_collision_system.system())
@@ -60,7 +58,8 @@ fn setup(
 }
 
 /// This system will then change the title during execution
-fn set_window_title(mut windows: ResMut<Windows>) {
+fn set_window_parameters(mut windows: ResMut<Windows>) {
     let window = windows.get_primary_mut().unwrap();
     window.set_title(String::from("Street of Zombies"));
+    window.set_resizable(false);
 }

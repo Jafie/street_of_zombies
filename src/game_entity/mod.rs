@@ -2,6 +2,9 @@ pub mod player;
 pub mod projectiles;
 pub mod ennemies;
 
+use crate::game_system::GAME_AREA_LIMIT_X;
+use crate::game_system::GAME_AREA_LIMIT_Y;
+
 use bevy::{
     prelude::*,
 };
@@ -59,7 +62,15 @@ pub trait MoveableSprite {
         // move the sprite
         translated_movement.x += time.delta_seconds() * direction.0 * &self.get_speed();
         translated_movement.y += time.delta_seconds() * direction.1 * &self.get_speed();
+
+        position_to_game_area_limit(translated_movement);
+
         self.set_new_position((translated_movement.x, translated_movement.y));
         self.set_new_direction(*direction);
     }
+}
+
+fn position_to_game_area_limit(translated_movement: &mut bevy::prelude::Vec3) {
+    translated_movement.x = translated_movement.x.min(GAME_AREA_LIMIT_X).max(-GAME_AREA_LIMIT_X);
+    translated_movement.y = translated_movement.y.min(GAME_AREA_LIMIT_Y).max(-GAME_AREA_LIMIT_Y);
 }

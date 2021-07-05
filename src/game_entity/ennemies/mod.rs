@@ -60,7 +60,6 @@ impl Ennemy {
 
     pub fn reduce_life(&mut self) {
         self.life -= 1;
-        println!("HIT! Ennemy life = {}", self.life);
     }
 
     pub fn is_dead(&self) -> bool {

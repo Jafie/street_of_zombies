@@ -8,6 +8,9 @@ use bevy::{
     sprite::collide_aabb::{collide}
 };
 
+// Game area limit
+pub static GAME_AREA_LIMIT_X: f32 = 500.0;
+pub static GAME_AREA_LIMIT_Y: f32 = 300.0;
 
 static MAXIMUM_ENNEMY_DISTANCE: f32 = 300.;
 static INITIAL_ENNEMY_SPEED: f32 = 200.0;
@@ -28,7 +31,8 @@ pub fn projectile_movement_system(
         projectile.move_sprite(&time, &direction_of_fire, &mut transform.translation);
 
         // If outside of game area, delete
-        if projectile.is_out_of_distance() {
+        if (projectile.is_out_of_distance())
+        || is_next_movement_out_of_game_area(projectile.get_position(), projectile.get_direction()) {
             commands.entity(projectile_entity).despawn();
         }
     }
@@ -54,7 +58,6 @@ pub fn projectile_collision_system(
     projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
 ) 
 { 
-
     // check collision with objects
     for (collider_entity, projectile, transform, sprite) in projectile_query.iter() {
         if projectile.is_coming_from_ennemy() {
@@ -63,10 +66,7 @@ pub fn projectile_collision_system(
         else {
             check_collision_with_ennemy(&mut commands, &mut query_set.q0_mut(), sprite, &collider_entity, transform);
         }
-
     }
-
-
 }
 
 pub fn keyboard_capture(
@@ -129,7 +129,8 @@ fn movement_of_ennemies(
             let ennemy_direction = ennemy.get_direction();
             ennemy.move_sprite(time, &ennemy_direction, &mut ennemy_transform.translation);
     
-            if math_cartesian::calculate_cartesian_distance(ennemy.get_initial_position(), ennemy.get_position()) > MAXIMUM_ENNEMY_DISTANCE {
+            if (math_cartesian::calculate_cartesian_distance(ennemy.get_initial_position(), ennemy.get_position()) > MAXIMUM_ENNEMY_DISTANCE)
+                || (is_next_movement_out_of_game_area(ennemy.get_position(), ennemy_direction)) {
                 // Reverse direction
                 ennemy.set_new_direction((-ennemy_direction.0, -ennemy_direction.1));
             }
@@ -227,4 +228,10 @@ fn check_and_treat_ennemy_life(commands: &mut Commands, ennemy: &mut ennemies::E
     if ennemy.is_dead() {
         commands.entity(entity).despawn();
     }
+}
+
+pub fn is_next_movement_out_of_game_area(position: (f32, f32), direction_factor: (f32, f32)) -> bool {
+    let next_movement_coord : (f32, f32) = ((position.0 + direction_factor.0).abs(), (position.1 + direction_factor.1).abs());
+    
+    next_movement_coord.0 > GAME_AREA_LIMIT_X || next_movement_coord.1 > GAME_AREA_LIMIT_Y
 }
