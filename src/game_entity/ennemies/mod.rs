@@ -1,4 +1,4 @@
-use crate::moveable_sprites::MoveableSprite;
+use crate::game_entity::MoveableSprite;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 
@@ -15,6 +15,7 @@ static FIRE_RATE: f32 = 0.2;
 /// The Ennemy
 pub struct Ennemy {
     speed: f32,
+    initial_position: (f32, f32),
     current_position : (f32, f32),
     move_direction: (f32, f32),
     fire_direction: (f32, f32),
@@ -46,6 +47,7 @@ impl Ennemy {
     pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32)) -> Self {
         Ennemy {
              speed: speed_to_set,
+             initial_position: initial_pos,
              current_position: initial_pos,
              move_direction: direction_to_set,
              fire_direction: (0.0, -1.0),
@@ -76,5 +78,9 @@ impl Ennemy {
                 self.current_weapon.reload();
                 self.tick_elapsed = 0.;
             }
+    }
+
+    pub fn get_initial_position(&self) -> (f32, f32) {
+        self.initial_position
     }
 }

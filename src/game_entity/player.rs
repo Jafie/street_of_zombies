@@ -1,5 +1,5 @@
-use crate::moveable_sprites::MoveableSprite;
-use crate::moveable_sprites::ennemies::Ennemy;
+use crate::game_entity::MoveableSprite;
+use crate::game_entity::ennemies::Ennemy;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 

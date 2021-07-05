@@ -1,4 +1,4 @@
-use crate::moveable_sprites::projectiles::Projectile;
+use crate::game_entity::projectiles::Projectile;
 use crate::weapons::Weapon;
 use crate::weapons::Pistol;
 

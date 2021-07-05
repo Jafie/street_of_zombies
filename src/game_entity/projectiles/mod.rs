@@ -1,5 +1,5 @@
-use crate::moveable_sprites::MoveableSprite;
-use crate::math_cartesian;
+use crate::game_entity::MoveableSprite;
+use crate::game_system::math_cartesian;
 
 
 pub struct Projectile {

@@ -1,6 +1,6 @@
 pub mod pistol;
 
-use crate::moveable_sprites::projectiles::Projectile;
+use crate::game_entity::projectiles::Projectile;
 
 use bevy::{
     prelude::*,
