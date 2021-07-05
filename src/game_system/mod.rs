@@ -7,7 +7,9 @@ use bevy::{
 
 use crate::game_entity::*;
 
-// Fire projectiles
+static MAXIMUM_ENNEMY_DISTANCE: f32 = 300.;
+
+/// Game System: Automatic movement of the projectiles.
 pub fn projectile_movement_system(
     mut commands: Commands,
     time: Res<Time>,
@@ -26,28 +28,16 @@ pub fn projectile_movement_system(
     }
 }
 
-// Ennemy AI system
+/// Game System: AI management for ennemies.
 pub fn ennemy_ai_system(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     mut ennemy_query: Query<(&mut ennemies::Ennemy, &mut Transform)>) {
-
-    for (mut ennemy, mut ennemy_transform) in ennemy_query.iter_mut() {
-        let ennemy_direction = ennemy.get_direction();
-        ennemy.move_sprite(&time, &ennemy_direction, &mut ennemy_transform.translation);
-
-        if math_cartesian::calculate_cartesian_distance(ennemy.get_initial_position(), ennemy.get_position()) > 300. {
-            // Reverse direction
-            ennemy.set_new_direction((-ennemy_direction.0, -ennemy_direction.1));
-        }
-
-        // Attack
-        ennemy.launch_attack(&mut commands, &mut materials, &time)
-    }
+        movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
 }
 
-
+/// Game System: The collision system with projectiles.
 pub fn projectile_collision_system(
     mut commands: Commands,
     mut query_set: QuerySet<(
@@ -71,6 +61,83 @@ pub fn projectile_collision_system(
 
 
 }
+
+pub fn keyboard_capture(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    time: Res<Time>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&mut player::Player, &mut Transform)>) {
+    
+    if let Ok((mut player, mut transform)) = query.single_mut() {
+        let mut direction : (f32, f32) = (0.0, 0.0);
+        let mut number_of_valid_pressure : u8 = 0;
+    
+        // Fire capture
+        if keyboard_input.pressed(KeyCode::Space) {
+            player.fire(&mut commands, &mut materials, &time);
+        }
+        else {
+            player.reload_weapon();
+        }
+
+        // Movement        
+        if keyboard_input.pressed(KeyCode::Left) {
+            direction.0 -= 1.0;
+            number_of_valid_pressure += 1;
+        }
+        if keyboard_input.pressed(KeyCode::Right) {
+            direction.0 += 1.0;
+            number_of_valid_pressure += 1;
+        }
+        if keyboard_input.pressed(KeyCode::Up) {
+            direction.1 += 1.0;
+            number_of_valid_pressure += 1;
+        }
+        if keyboard_input.pressed(KeyCode::Down) {
+            direction.1 -= 1.0;
+            number_of_valid_pressure += 1;
+        }
+
+        match number_of_valid_pressure {
+            0 => return,
+            1 => (),
+            _ => { 
+                direction.0 = direction.0 / 1.5;
+                direction.1 = direction.1 / 1.5;
+            }
+        }
+
+
+        player.move_sprite(&time, &direction, &mut transform.translation);
+    }
+}
+
+fn movement_of_ennemies(
+    commands: &mut Commands,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    time: &Res<Time>,
+    ennemy_query: &mut Query<(&mut ennemies::Ennemy, &mut Transform)>) {
+        for (mut ennemy, mut ennemy_transform) in ennemy_query.iter_mut() {
+            let ennemy_direction = ennemy.get_direction();
+            ennemy.move_sprite(time, &ennemy_direction, &mut ennemy_transform.translation);
+    
+            if math_cartesian::calculate_cartesian_distance(ennemy.get_initial_position(), ennemy.get_position()) > MAXIMUM_ENNEMY_DISTANCE {
+                // Reverse direction
+                ennemy.set_new_direction((-ennemy_direction.0, -ennemy_direction.1));
+            }
+    
+            // Attack
+            ennemy.launch_attack(commands, materials, time)
+        }
+}
+
+/*fn ennemy_spawn(
+    commands: &mut Commands,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    time: &Res<Time>) {
+
+}*/
 
 fn check_collision_with_ennemy(
     commands: &mut Commands,

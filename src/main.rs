@@ -7,7 +7,6 @@ use bevy::{
 };
 
 
-use crate::game_entity::*;
 use crate::game_system::*;
 
 
@@ -28,7 +27,6 @@ static INITIAL_ENNEMY_SPEED: f32 = 200.0;
 static INITIAL_ENNEMY_DIRECTION: (f32, f32) = (1.0, 0.0);
 
 
-
 fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
@@ -40,7 +38,7 @@ fn main() {
         })
         .add_startup_system(setup.system())
         .add_startup_system(set_window_title.system())
-        .add_system(player::keyboard_capture.system())
+        .add_system(keyboard_capture.system())
         .add_system(projectile_movement_system.system())
         .add_system(projectile_collision_system.system())
         .add_system(ennemy_ai_system.system())
