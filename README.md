@@ -22,7 +22,7 @@ With Rust installed, a simple "cargo run" is necessary to run the game.
 - [ ] Sprite usage.
 - [x] Map limit.
 - [ ] Bonus (Change weapons and Projectile types).
-- [ ] Scoreboard + Player life.
+- [x] Scoreboard + Player life.
 
 ## Screenshots and Gameplay
 

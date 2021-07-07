@@ -57,15 +57,15 @@ impl ScoreAndInfo {
         let difficulty_level_list = vec!("EASY", "NORMAL", "HARD", "ULTRA HARD", "EXTREME", "!YOU WILL DIE!");
 
 
-        text.sections[0].value = format!("Score: {}", self.get_score());
-        text.sections[1].value = format!("  Life: {}", self.get_life());
+        text.sections[0].value = format!("Score: {:9}", self.get_score());
+        text.sections[1].value = format!("    -  Life: {:1}", self.get_life());
 
         let difficulty_text = match difficulty_level_list.get(self.difficulty_level as usize) {
             Some(difficulty_level) => difficulty_level,
             None => "UNKNOWN"
         };
 
-        text.sections[2].value = format!("    - Difficulty : {} -  {}%", difficulty_text, self.get_percent_until_next_difficulty_level());
+        text.sections[2].value = format!("    -  Difficulty : {:15}  -  {:3}%", difficulty_text, self.get_percent_until_next_difficulty_level());
     }
 
     fn get_score(&self) -> u32 {
