@@ -1,4 +1,5 @@
 pub mod math_cartesian;
+mod scoreboard;
 
 use crate::game_entity::*;
 
@@ -14,8 +15,81 @@ pub static GAME_AREA_LIMIT_Y: f32 = 300.0;
 
 static MAXIMUM_ENNEMY_DISTANCE: f32 = 300.;
 static INITIAL_ENNEMY_SPEED: f32 = 200.0;
-// One spawn about each 10 seconds
-static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 650;
+
+// Main character initialization
+static INITIAL_PLAYER_POSITION: f32 = 0.0;
+static INITIAL_PLAYER_POSITION_Y: f32 = -215.0;
+static INITIAL_PLAYER_SPEED: f32 = 350.0;
+static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
+
+/// Initial setup
+pub fn setup(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>
+) {
+    // cameras
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn_bundle(UiCameraBundle::default());
+
+
+    // Main character
+    commands
+        .spawn_bundle(SpriteBundle {
+            material: materials.add(Color::rgb(0.3, 0.0, 1.0).into()),
+            transform: Transform::from_xyz(INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y, 0.0),
+            sprite: Sprite::new(Vec2::new(30.0, 30.0)),
+            ..Default::default()
+        })
+        .insert(player::Player::new(INITIAL_PLAYER_SPEED, 
+            INITIAL_PLAYER_DIRECTION,
+            (INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y)));
+
+    // Scoreboard
+    // scoreboard
+    commands.spawn_bundle(TextBundle {
+        text: Text {
+            sections: vec![
+                TextSection {
+                    value: "Score".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 40.0,
+                        color: Color::rgb(0.5, 0.5, 1.0),
+                    },
+                },
+                TextSection {
+                    value: "Life".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 40.0,
+                        color: Color::rgb(0.5, 1.0, 0.5),
+                    },
+                },
+                TextSection {
+                    value: "Difficulty".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 40.0,
+                        color: Color::rgb(1.0, 0.5, 0.5),
+                    },
+                },
+            ],
+            ..Default::default()
+        },
+        style: Style {
+            position_type: PositionType::Absolute,
+            position: Rect {
+                top: Val::Px(0.),
+                left: Val::Px(0.),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        ..Default::default()
+    })
+    .insert(scoreboard::ScoreAndInfo::new());
+}
 
 
 /// Game System: Automatic movement of the projectiles.
@@ -38,35 +112,54 @@ pub fn projectile_movement_system(
     }
 }
 
-/// Game System: AI management for ennemies.
+/// Game System: AI management for ennemies  and manage the part "Difficulty" of the score system
 pub fn ennemy_ai_system(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
-    mut ennemy_query: Query<(&mut ennemies::Ennemy, &mut Transform)>) {
-        movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
-        ennemy_spawn_system(&mut commands, &mut materials);
+    mut ennemy_query: Query<(&mut ennemies::Ennemy, &mut Transform)>,
+    scoreboard_query: Query<&scoreboard::ScoreAndInfo>
+) {
+    let current_scoreboard = scoreboard_query.single().unwrap();
+    movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
+    ennemy_spawn_system(&mut commands, &mut materials, current_scoreboard.get_difficulty_level());
 }
 
-/// Game System: The collision system with projectiles.
-pub fn projectile_collision_system(
+/// Game System: The collision system with projectiles and manage the part "Life + Score" of the score system
+pub fn projectile_collision_and_score_system(
     mut commands: Commands,
     mut query_set: QuerySet<(
         Query<(&mut ennemies::Ennemy, &Transform, &Sprite, Entity)>,
         Query<(&mut player::Player, &Transform, &Sprite, Entity)>
     )>,
     projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
+    mut scoreboard_query: Query<(&mut scoreboard::ScoreAndInfo, &mut Text)>
 ) 
 { 
+    let (mut score_struct, mut score_text) = scoreboard_query.single_mut().unwrap();
+
     // check collision with objects
     for (collider_entity, projectile, transform, sprite) in projectile_query.iter() {
         if projectile.is_coming_from_ennemy() {
-            check_collision_with_player(&mut commands, &mut query_set.q1_mut(), sprite, &collider_entity, transform);
+            check_collision_with_player(&mut commands, 
+                &mut query_set.q1_mut(), 
+                sprite, 
+                &collider_entity, 
+                transform, 
+                &mut score_struct);
         }
         else {
-            check_collision_with_ennemy(&mut commands, &mut query_set.q0_mut(), sprite, &collider_entity, transform);
+            check_collision_with_ennemy(&mut commands, 
+                &mut query_set.q0_mut(), 
+                sprite, 
+                &collider_entity, 
+                transform, 
+                &mut score_struct);
         }
     }
+
+    score_struct.update_percent_until_next_level();
+    score_struct.update_scoarboard_text(&mut score_text);
 }
 
 pub fn keyboard_capture(
@@ -142,13 +235,17 @@ fn movement_of_ennemies(
 
 fn ennemy_spawn_system(
     commands: &mut Commands,
-    materials: &mut ResMut<Assets<ColorMaterial>>) 
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    difficulty_level: u32) 
 {
+    static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 1000;
+    let generated_spawn_factor = SPAWN_FACTOR_CLASSIC_ENNEMY - (200*difficulty_level);
+
     let mut rng = rand::thread_rng();
-    let rand_system = rng.gen_range(0..SPAWN_FACTOR_CLASSIC_ENNEMY);
+    let rand_system = rng.gen_range(0..generated_spawn_factor);
 
     
-    if rand_system == 1 {
+    if rand_system <= 2 {
         generate_new_ennemy(commands, materials);
     }
 }
@@ -175,7 +272,8 @@ fn generate_new_ennemy(
         INITIAL_ENNEMY_SPEED,
         ennemy_initial_direction,
         ennemy_initial_position,
-        ennemy_fire_direction)
+        ennemy_fire_direction,
+        50)
     );
 }
 
@@ -184,8 +282,9 @@ fn check_collision_with_ennemy(
     entity_query: &mut Query<(&mut ennemies::Ennemy, &Transform, &Sprite, Entity)>,
     projectile_sprite: &Sprite,
     projectile_entity: &Entity,
-    projectile_transform: &Transform) {
-    
+    projectile_transform: &Transform,
+    score_struct: &mut scoreboard::ScoreAndInfo) {
+
     for (mut ennemy, ennemy_transform, sprite, entity_ennemy) in entity_query.iter_mut() {
         let ennemy_size = sprite.size;
         let collision = collide(
@@ -197,7 +296,8 @@ fn check_collision_with_ennemy(
         if let Some(_) = collision {
                 commands.entity(*projectile_entity).despawn();
                 ennemy.reduce_life();
-                check_and_treat_ennemy_life(commands, &mut ennemy, entity_ennemy);
+                score_struct.add_to_score(ennemy.get_point_value_per_hits());
+                check_and_treat_ennemy_life(commands, &mut ennemy, entity_ennemy, score_struct);
         }
     }
 }
@@ -207,7 +307,8 @@ fn check_collision_with_player(
     entity_query: &mut Query<(&mut player::Player, &Transform, &Sprite, Entity)>,
     projectile_sprite: &Sprite,
     projectile_entity: &Entity,
-    projectile_transform: &Transform) {
+    projectile_transform: &Transform,
+    score_struct: &mut scoreboard::ScoreAndInfo) {
     
     for (_, player_transform, sprite, _) in entity_query.iter_mut() {
         let player_size = sprite.size;
@@ -219,13 +320,15 @@ fn check_collision_with_player(
         );
         if let Some(_) = collision {
                 commands.entity(*projectile_entity).despawn();
+                score_struct.remove_life(1);
         }
     }
 }
 
 
-fn check_and_treat_ennemy_life(commands: &mut Commands, ennemy: &mut ennemies::Ennemy, entity: Entity) {
+fn check_and_treat_ennemy_life(commands: &mut Commands, ennemy: &mut ennemies::Ennemy, entity: Entity, score: &mut scoreboard::ScoreAndInfo) {
     if ennemy.is_dead() {
+        score.add_to_score(ennemy.get_point_value_on_death());
         commands.entity(entity).despawn();
     }
 }

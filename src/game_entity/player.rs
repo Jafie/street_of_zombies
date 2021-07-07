@@ -7,10 +7,10 @@ use bevy::{
 };
 
 // Default pistol weapon data
-static PROJECTILE_SPEED: f32 = 600.0;
-static AMO_IN_WEAPON: u32 = 10;
-static LIMIT_OF_FIRE: u32 = 500;
-static FIRE_RATE: f32 = 0.2;
+static PROJECTILE_SPEED: f32 = 700.0;
+static AMO_IN_WEAPON: u32 = 800;
+static LIMIT_OF_FIRE: u32 = 700;
+static FIRE_RATE: f32 = 0.18;
 
 /// The Main Character. Controllable by the player.
 pub struct Player {
@@ -41,10 +41,11 @@ impl MoveableSprite for Player {
 impl Player {
     pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32)) -> Self {
         Player {
-             speed: speed_to_set,
-             current_position: initial_pos,
-             direction: direction_to_set,
-             current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE))}
+            speed: speed_to_set,
+            current_position: initial_pos,
+            direction: direction_to_set,
+            current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
+        }
     }
 
     pub fn fire(&mut self,

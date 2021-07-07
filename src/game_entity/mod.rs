@@ -9,7 +9,6 @@ use bevy::{
     prelude::*,
 };
 
-
 /// A sprite which is able to move
 pub trait MoveableSprite {
     /// Get the current move speed of a moveable sprite in the game area
