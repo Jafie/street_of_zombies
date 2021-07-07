@@ -7,10 +7,10 @@ use bevy::{
 };
 
 // Default pistol weapon data
-static PROJECTILE_SPEED: f32 = 400.0;
+static PROJECTILE_SPEED: f32 = 300.0;
 static AMO_IN_WEAPON: u32 = 3;
 static LIMIT_OF_FIRE: u32 = 500;
-static FIRE_RATE: f32 = 0.3;
+static FIRE_RATE: f32 = 0.5;
 static NUMBER_OF_LIFE: i32 = 3;
 
 /// The Ennemy
@@ -56,7 +56,7 @@ impl Ennemy {
             life: NUMBER_OF_LIFE,
             current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
             tick_elapsed: 0.,
-            cooldown_tick: 2.0,
+            cooldown_tick: 2.5,
             points_per_hits: points}
     }
 

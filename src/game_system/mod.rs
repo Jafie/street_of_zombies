@@ -253,12 +253,9 @@ fn ennemy_spawn_system(
 fn generate_new_ennemy(
     commands: &mut Commands,
     materials: &mut ResMut<Assets<ColorMaterial>>,) {
-
-    let mut rng = rand::thread_rng();
-
-    let ennemy_initial_position: (f32, f32) = (rng.gen_range(-300.0..300.0), rng.gen_range(-300.0..300.0));
-    let ennemy_initial_direction: (f32, f32) = (rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0));
-    let ennemy_fire_direction: (f32, f32) = (rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0));
+    let ennemy_initial_position: (f32, f32) = math_cartesian::generate_random_position();
+    let ennemy_initial_direction: (f32, f32) = math_cartesian::generate_random_direction_factor();
+    let ennemy_fire_direction: (f32, f32) = math_cartesian::generate_random_direction_factor_strict();
 
     // Ennemy
     commands
