@@ -37,6 +37,9 @@ impl ScoreAndInfo {
     }
 
     pub fn update_percent_until_next_level(&mut self) {
+        if self.difficulty_level == MAX_DIFFICULTY_LEVEL {
+            return;
+        }
 
         let second_for_next_difficulty_level  = SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY as u64;
         let mut percent_elapsed = ((self.start_time.elapsed().as_secs()*100) / second_for_next_difficulty_level) as u32;
@@ -78,6 +81,10 @@ impl ScoreAndInfo {
     }
 
     fn get_percent_until_next_difficulty_level(&self) -> u32 {
+        if self.difficulty_level == MAX_DIFFICULTY_LEVEL {
+            return 666;
+        }
+    
         self.percent_until_next_level
     }
 

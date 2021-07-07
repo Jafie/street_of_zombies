@@ -39,10 +39,10 @@ pub fn generate_random_direction_factor_strict() -> (f32, f32) {
     direction_factor
 }
 
-pub fn generate_random_position() -> (f32, f32) {
+pub fn generate_random_position(absolute_max_x: f32, absolute_max_y: f32) -> (f32, f32) {
     let mut rng = rand::thread_rng();
 
-    let generated_position: (f32, f32) = (rng.gen_range(-300.0..300.0), rng.gen_range(-300.0..300.0));
+    let generated_position: (f32, f32) = (rng.gen_range(-absolute_max_x..absolute_max_x), rng.gen_range(-absolute_max_y..absolute_max_y));
     
     generated_position
 }

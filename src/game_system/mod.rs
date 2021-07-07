@@ -238,7 +238,7 @@ fn ennemy_spawn_system(
     materials: &mut ResMut<Assets<ColorMaterial>>,
     difficulty_level: u32) 
 {
-    static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 1000;
+    static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 1100;
     let generated_spawn_factor = SPAWN_FACTOR_CLASSIC_ENNEMY - (200*difficulty_level);
 
     let mut rng = rand::thread_rng();
@@ -253,7 +253,9 @@ fn ennemy_spawn_system(
 fn generate_new_ennemy(
     commands: &mut Commands,
     materials: &mut ResMut<Assets<ColorMaterial>>,) {
-    let ennemy_initial_position: (f32, f32) = math_cartesian::generate_random_position();
+
+    // Random generation
+    let ennemy_initial_position: (f32, f32) = math_cartesian::generate_random_position(GAME_AREA_LIMIT_X, GAME_AREA_LIMIT_Y);
     let ennemy_initial_direction: (f32, f32) = math_cartesian::generate_random_direction_factor();
     let ennemy_fire_direction: (f32, f32) = math_cartesian::generate_random_direction_factor_strict();
 
