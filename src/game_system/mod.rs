@@ -183,19 +183,19 @@ pub fn keyboard_capture(
 
         // Movement        
         if keyboard_input.pressed(KeyCode::Left) {
-            direction.0 -= 1.0;
+            direction.0 = -1.0;
             number_of_valid_pressure += 1;
         }
         if keyboard_input.pressed(KeyCode::Right) {
-            direction.0 += 1.0;
+            direction.0 = 1.0;
             number_of_valid_pressure += 1;
         }
         if keyboard_input.pressed(KeyCode::Up) {
-            direction.1 += 1.0;
+            direction.1 = 1.0;
             number_of_valid_pressure += 1;
         }
         if keyboard_input.pressed(KeyCode::Down) {
-            direction.1 -= 1.0;
+            direction.1 = -1.0;
             number_of_valid_pressure += 1;
         }
 
@@ -203,8 +203,8 @@ pub fn keyboard_capture(
             0 => return,
             1 => (),
             _ => { 
-                direction.0 = direction.0 / 1.5;
-                direction.1 = direction.1 / 1.5;
+                direction.0 = (direction.0.abs() - 0.33) * direction.0;
+                direction.1 = (direction.1.abs() - 0.33) * direction.1;
             }
         }
 
