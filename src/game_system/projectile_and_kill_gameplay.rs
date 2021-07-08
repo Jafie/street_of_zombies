@@ -30,7 +30,7 @@ pub fn projectile_movement_system(
 pub fn projectile_collision_and_score_system(
     mut commands: Commands,
     mut query_set: QuerySet<(
-        Query<(&mut ennemies::Ennemy, &Transform, &Sprite, Entity)>,
+        Query<(&mut ennemies::Ennemy, &Transform, Entity)>,
         Query<(&mut player::Player, &Transform, &Sprite, Entity)>
     )>,
     projectile_query: Query<(Entity, &projectiles::Projectile, &Transform, &Sprite)>,
@@ -65,14 +65,16 @@ pub fn projectile_collision_and_score_system(
 
 fn check_collision_with_ennemy(
     commands: &mut Commands,
-    entity_query: &mut Query<(&mut ennemies::Ennemy, &Transform, &Sprite, Entity)>,
+    entity_query: &mut Query<(&mut ennemies::Ennemy, &Transform, Entity)>,
     projectile_sprite: &Sprite,
     projectile_entity: &Entity,
     projectile_transform: &Transform,
     score_struct: &mut scoreboard::ScoreAndInfo) {
 
-    for (mut ennemy, ennemy_transform, sprite, entity_ennemy) in entity_query.iter_mut() {
-        let ennemy_size = sprite.size;
+    for (mut ennemy, ennemy_transform, entity_ennemy) in entity_query.iter_mut() {
+        let (hibox_x, hitbox_y) = ennemy.get_hitbox_size();
+        let ennemy_size = Vec2::new(hibox_x, hitbox_y);
+    
         let collision = collide(
             ennemy_transform.translation,
             ennemy_size,

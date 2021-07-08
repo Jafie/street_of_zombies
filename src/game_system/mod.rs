@@ -1,9 +1,11 @@
 pub mod math_and_generator;
 pub mod ennemy_spawn_ai_gameplay;
 pub mod projectile_and_kill_gameplay;
+
 mod scoreboard;
 
 use crate::game_entity::*;
+use crate::sprite_manager_system::*;
 
 use bevy::{
     prelude::*
@@ -17,7 +19,7 @@ static MAXIMUM_ENNEMY_DISTANCE: f32 = 300.;
 static INITIAL_ENNEMY_SPEED: f32 = 200.0;
 
 // Main character initialization
-static INITIAL_PLAYER_POSITION: f32 = 0.0;
+static INITIAL_PLAYER_POSITION_X: f32 = 0.0;
 static INITIAL_PLAYER_POSITION_Y: f32 = -215.0;
 static INITIAL_PLAYER_SPEED: f32 = 350.0;
 static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
@@ -25,8 +27,8 @@ static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
 /// Initial setup
 pub fn setup(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>
 ) {
     // cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
@@ -35,18 +37,18 @@ pub fn setup(
 
     // Main character
     commands
-        .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.3, 0.0, 1.0).into()),
-            transform: Transform::from_xyz(INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y, 0.0),
-            sprite: Sprite::new(Vec2::new(30.0, 30.0)),
+        .spawn_bundle(SpriteSheetBundle {
+            texture_atlas: generate_texture(&asset_server, &mut texture_atlases, TextureToGenerate::PLAYER),
+            transform: Transform::from_xyz(INITIAL_PLAYER_POSITION_X, INITIAL_PLAYER_POSITION_Y, 0.0),
+            sprite: TextureAtlasSprite::new(1),
             ..Default::default()
         })
         .insert(player::Player::new(INITIAL_PLAYER_SPEED, 
             INITIAL_PLAYER_DIRECTION,
-            (INITIAL_PLAYER_POSITION, INITIAL_PLAYER_POSITION_Y)));
+            (INITIAL_PLAYER_POSITION_X, INITIAL_PLAYER_POSITION_Y)))
+        .insert(Timer::from_seconds(0.1, true));
 
     // Scoreboard
-    // scoreboard
     commands.spawn_bundle(TextBundle {
         text: Text {
             sections: vec![

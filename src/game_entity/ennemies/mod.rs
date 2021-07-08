@@ -24,7 +24,8 @@ struct EnnemyInternalData {
     current_weapon: Box<dyn Weapon + Send + Sync>,
     tick_elapsed: f32,
     cooldown_tick: f32,
-    points_per_hits: u32
+    points_per_hits: u32,
+    ennemy_hitbox_size: (f32, f32)
 }
 
 /// An ennemy entity - An Ennemy object contains all the data necessary for a single ennemy
@@ -75,7 +76,9 @@ impl Ennemy {
                             current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
                             tick_elapsed: 0.,
                             cooldown_tick: 2.5,
-                            points_per_hits: points}
+                            points_per_hits: points,
+                            ennemy_hitbox_size: (40., 50.)
+            }
         }
     }
 
@@ -165,6 +168,10 @@ impl Ennemy {
     /// ```
     pub fn get_point_value_on_death(&self) -> u32 {
         self.internal_data.points_per_hits*DEATH_POINT_COEF
+    }
+
+    pub fn get_hitbox_size(&self) -> (f32, f32) {
+        self.internal_data.ennemy_hitbox_size
     }
 }
 

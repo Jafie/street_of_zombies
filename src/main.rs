@@ -1,6 +1,7 @@
 mod game_entity;
 mod game_system;
 mod weapons;
+mod sprite_manager_system;
 
 use bevy::{
     prelude::*
@@ -27,6 +28,7 @@ fn main() {
         .add_system(projectile_and_kill_gameplay::projectile_movement_system.system())
         .add_system(projectile_and_kill_gameplay::projectile_collision_and_score_system.system())
         .add_system(ennemy_spawn_ai_gameplay::ennemy_ai_system.system())
+        .add_system(sprite_manager_system::animate_sprite_system.system())
         .run();
 }
 
