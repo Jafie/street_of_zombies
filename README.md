@@ -1,4 +1,5 @@
 # street_of_zombies
+![UnitaryTest](https://github.com/Jafie/street_of_zombies/actions/workflows/rust.yml/badge.svg)
 First Rust project and experience with the [Bevy](https://github.com/bevyengine/bevy) engine. It is a simple Gun-And-Run game in development.
 
 ## Installation

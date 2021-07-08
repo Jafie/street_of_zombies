@@ -1,4 +1,4 @@
-name: Rust
+name: Unitary_Test_Main
 
 on:
   push:
