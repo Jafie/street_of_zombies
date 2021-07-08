@@ -14,6 +14,10 @@ static FIRE_RATE: f32 = 0.18;
 
 /// The Main Character. Controllable by the player.
 pub struct Player {
+    player_data: PlayerInternal
+}
+
+struct PlayerInternal {
     speed: f32,
     current_position : (f32, f32),
     direction: (f32, f32),
@@ -22,29 +26,31 @@ pub struct Player {
 
 impl MoveableSprite for Player {
     fn get_speed(&self) -> f32 {
-        self.speed
+        self.player_data.speed
     }
     fn set_new_direction(&mut self, direction: (f32, f32)) {
-        self.direction = direction;
+        self.player_data.direction = direction;
     }
     fn get_direction(&self) -> (f32, f32) {
-        self.direction
+        self.player_data.direction
     }
     fn get_position(&self) -> (f32, f32) {
-        self.current_position
+        self.player_data.current_position
     }
     fn set_new_position(&mut self, position: (f32, f32)) {
-        self.current_position = position;
+        self.player_data.current_position = position;
     }
 }
 
 impl Player {
     pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32)) -> Self {
         Player {
-            speed: speed_to_set,
-            current_position: initial_pos,
-            direction: direction_to_set,
-            current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
+                player_data : PlayerInternal {
+                            speed: speed_to_set,
+                            current_position: initial_pos,
+                            direction: direction_to_set,
+                            current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
+                        }
         }
     }
 
@@ -52,10 +58,51 @@ impl Player {
         commands: &mut Commands,
         materials: &mut ResMut<Assets<ColorMaterial>>,
         time: &Res<Time>) {
-            self.current_weapon.fire_global(commands, materials, &time, self.get_direction(), self.get_position(), false);
+            self.player_data.current_weapon.fire_global(commands, materials, &time, self.get_direction(), self.get_position(), false);
     }
 
     pub fn reload_weapon(&mut self) {
-        self.current_weapon.reload();
+        self.player_data.current_weapon.reload();
+    }
+}
+
+
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn player_initial_speed() {
+        let player = Player::new(500.0, (5., 10.), (15., 20.));
+
+        assert_eq!(player.get_speed(), 500.0);
+    }
+
+    #[test]
+    fn player_initial_direction() {
+        let player = Player::new(500.0, (5., 10.), (15., 20.));
+
+        assert_eq!(player.get_direction(), (5., 10.));
+    }
+
+    #[test]
+    fn player_initial_position() {
+        let player = Player::new(500.0, (5., 10.), (15., 20.));
+
+        assert_eq!(player.get_position(), (15., 20.));
+    }
+
+    #[test]
+    fn player_set_direction() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.set_new_direction((100., 45.));
+        assert_eq!(player.get_direction(), (100., 45.));
+    }
+
+    #[test]
+    fn player_set_position() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.set_new_position((60., 40.));
+        assert_eq!(player.get_position(), (60., 40.));
     }
 }

@@ -172,7 +172,7 @@ pub fn keyboard_capture(
     if let Ok((mut player, mut transform)) = query.single_mut() {
         let mut direction : (f32, f32) = (0.0, 0.0);
         let mut number_of_valid_pressure : u8 = 0;
-    
+
         // Fire capture
         if keyboard_input.pressed(KeyCode::Space) {
             player.fire(&mut commands, &mut materials, &time);

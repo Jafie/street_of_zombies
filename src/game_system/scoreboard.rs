@@ -11,7 +11,7 @@ static MAX_DIFFICULTY_LEVEL: u32 = 5;
 static SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY: u32 = 60;
 
 
-pub struct ScoreAndInfo {
+struct ScoreAndInfoInternal {
     score: u32,
     life: u32,
     percent_until_next_level: u32,
@@ -19,38 +19,45 @@ pub struct ScoreAndInfo {
     start_time: Instant
 }
 
+pub struct ScoreAndInfo {
+    score_data: ScoreAndInfoInternal
+}
+
+
 impl ScoreAndInfo {
     pub fn new() -> Self {
-        ScoreAndInfo {score: 0, life: PLAYER_INITIAL_LIFE, difficulty_level: 0, percent_until_next_level: 0, start_time: Instant::now()}
+        ScoreAndInfo {
+            score_data: ScoreAndInfoInternal {score: 0, life: PLAYER_INITIAL_LIFE, difficulty_level: 0, percent_until_next_level: 0, start_time: Instant::now()}
+        }
     }
 
     pub fn add_to_score(&mut self, score_added: u32) {
-        self.score += score_added;
+        self.score_data.score += score_added;
     }
 
     pub fn remove_life(&mut self, life_to_remove: u32) {
-        let remove_life_result = self.life.overflowing_sub(life_to_remove);
+        let remove_life_result = self.score_data.life.overflowing_sub(life_to_remove);
         match remove_life_result {
-            (new_life, false) => self.life = new_life,
-            (_, true) => self.life = 0
+            (new_life, false) => self.score_data.life = new_life,
+            (_, true) => self.score_data.life = 0
         }
     }
 
     pub fn update_percent_until_next_level(&mut self) {
-        if self.difficulty_level == MAX_DIFFICULTY_LEVEL {
+        if self.score_data.difficulty_level == MAX_DIFFICULTY_LEVEL {
             return;
         }
 
         let second_for_next_difficulty_level  = SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY as u64;
-        let mut percent_elapsed = ((self.start_time.elapsed().as_secs()*100) / second_for_next_difficulty_level) as u32;
+        let mut percent_elapsed = ((self.score_data.start_time.elapsed().as_secs()*100) / second_for_next_difficulty_level) as u32;
 
         if percent_elapsed >= 100 {
-            self.start_time = Instant::now();
+            self.score_data.start_time = Instant::now();
             self.increase_difficulty_level();
             percent_elapsed = 0;
         }
 
-        self.percent_until_next_level = percent_elapsed;
+        self.score_data.percent_until_next_level = percent_elapsed;
     }
 
     pub fn update_scoarboard_text(&self, text: &mut Text) {
@@ -60,7 +67,7 @@ impl ScoreAndInfo {
         text.sections[0].value = format!("Score: {:9}", self.get_score());
         text.sections[1].value = format!("    -  Life: {:1}", self.get_life());
 
-        let difficulty_text = match difficulty_level_list.get(self.difficulty_level as usize) {
+        let difficulty_text = match difficulty_level_list.get(self.score_data.difficulty_level as usize) {
             Some(difficulty_level) => difficulty_level,
             None => "UNKNOWN"
         };
@@ -69,30 +76,30 @@ impl ScoreAndInfo {
     }
 
     fn get_score(&self) -> u32 {
-        self.score
+        self.score_data.score
     }
 
     fn get_life(&self) -> u32 {
-        self.life
+        self.score_data.life
     }
 
     pub fn get_difficulty_level(&self) -> u32 {
-        self.difficulty_level
+        self.score_data.difficulty_level
     }
 
     fn get_percent_until_next_difficulty_level(&self) -> u32 {
-        if self.difficulty_level == MAX_DIFFICULTY_LEVEL {
+        if self.score_data.difficulty_level == MAX_DIFFICULTY_LEVEL {
             return 666;
         }
     
-        self.percent_until_next_level
+        self.score_data.percent_until_next_level
     }
 
     fn increase_difficulty_level(&mut self) {
-        self.difficulty_level += 1;
+        self.score_data.difficulty_level += 1;
 
-        if self.difficulty_level > MAX_DIFFICULTY_LEVEL {
-            self.difficulty_level = MAX_DIFFICULTY_LEVEL;
+        if self.score_data.difficulty_level > MAX_DIFFICULTY_LEVEL {
+            self.score_data.difficulty_level = MAX_DIFFICULTY_LEVEL;
         }
     }
 }
