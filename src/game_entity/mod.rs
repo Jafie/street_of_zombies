@@ -69,6 +69,12 @@ pub trait MoveableSprite {
     }
 }
 
+/// Force the position to the game area limit
+///
+/// # Arguments
+///
+/// * `translated_movement` - The "translated movement" returned to bevy engine.
+///
 fn position_to_game_area_limit(translated_movement: &mut bevy::prelude::Vec3) {
     translated_movement.x = translated_movement.x.min(GAME_AREA_LIMIT_X).max(-GAME_AREA_LIMIT_X);
     translated_movement.y = translated_movement.y.min(GAME_AREA_LIMIT_Y).max(-GAME_AREA_LIMIT_Y);

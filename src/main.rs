@@ -24,13 +24,13 @@ fn main() {
         .add_startup_system(setup.system())
         .add_startup_system(set_window_parameters.system())
         .add_system(keyboard_capture.system())
-        .add_system(projectile_movement_system.system())
-        .add_system(projectile_collision_and_score_system.system())
-        .add_system(ennemy_ai_system.system())
+        .add_system(projectile_and_kill_gameplay::projectile_movement_system.system())
+        .add_system(projectile_and_kill_gameplay::projectile_collision_and_score_system.system())
+        .add_system(ennemy_spawn_ai_gameplay::ennemy_ai_system.system())
         .run();
 }
 
-/// This system will then change the title during execution
+/// This "Startup-Item" modify the Window parameter (title and no-resize)
 fn set_window_parameters(mut windows: ResMut<Windows>) {
     let window = windows.get_primary_mut().unwrap();
     window.set_title(String::from("Street of Zombies"));

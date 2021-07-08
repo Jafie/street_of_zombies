@@ -6,14 +6,14 @@ use bevy::{
 };
 
 
-static PLAYER_INITIAL_LIFE: u32 = 5;
+static INITIAL_PLAYER_HEALTH: u32 = 5;
 static MAX_DIFFICULTY_LEVEL: u32 = 5;
 static SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY: u32 = 60;
 
 
 struct ScoreAndInfoInternal {
     score: u32,
-    life: u32,
+    health: u32,
     percent_until_next_level: u32,
     difficulty_level: u32,
     start_time: Instant
@@ -27,7 +27,7 @@ pub struct ScoreAndInfo {
 impl ScoreAndInfo {
     pub fn new() -> Self {
         ScoreAndInfo {
-            score_data: ScoreAndInfoInternal {score: 0, life: PLAYER_INITIAL_LIFE, difficulty_level: 0, percent_until_next_level: 0, start_time: Instant::now()}
+            score_data: ScoreAndInfoInternal {score: 0, health: INITIAL_PLAYER_HEALTH, difficulty_level: 0, percent_until_next_level: 0, start_time: Instant::now()}
         }
     }
 
@@ -35,11 +35,11 @@ impl ScoreAndInfo {
         self.score_data.score += score_added;
     }
 
-    pub fn remove_life(&mut self, life_to_remove: u32) {
-        let remove_life_result = self.score_data.life.overflowing_sub(life_to_remove);
-        match remove_life_result {
-            (new_life, false) => self.score_data.life = new_life,
-            (_, true) => self.score_data.life = 0
+    pub fn remove_health(&mut self, health_to_remove: u32) {
+        let remove_health_result = self.score_data.health.overflowing_sub(health_to_remove);
+        match remove_health_result {
+            (new_health, false) => self.score_data.health = new_health,
+            (_, true) => self.score_data.health = 0
         }
     }
 
@@ -61,26 +61,26 @@ impl ScoreAndInfo {
     }
 
     pub fn update_scoarboard_text(&self, text: &mut Text) {
-        let difficulty_level_list = vec!("EASY", "NORMAL", "HARD", "ULTRA HARD", "EXTREME", "!YOU WILL DIE!");
+        let difficulty_level_list = vec!("EASY", "NORMAL", "HARD", "EXTREME", "STILL OK?", "!YOU ARE GOING TO DIE!");
 
 
-        text.sections[0].value = format!("Score: {:9}", self.get_score());
-        text.sections[1].value = format!("    -  Life: {:1}", self.get_life());
+        text.sections[0].value = format!("SCORE: {:10}", self.get_score());
+        text.sections[1].value = format!("    -  HEALTH: {:2}", self.get_health());
 
         let difficulty_text = match difficulty_level_list.get(self.score_data.difficulty_level as usize) {
             Some(difficulty_level) => difficulty_level,
             None => "UNKNOWN"
         };
 
-        text.sections[2].value = format!("    -  Difficulty : {:15}  -  {:3}%", difficulty_text, self.get_percent_until_next_difficulty_level());
+        text.sections[2].value = format!("    -  DIFFICULTY : {:30}  -  {:3}%", difficulty_text, self.get_percent_until_next_difficulty_level());
     }
 
     fn get_score(&self) -> u32 {
         self.score_data.score
     }
 
-    fn get_life(&self) -> u32 {
-        self.score_data.life
+    fn get_health(&self) -> u32 {
+        self.score_data.health
     }
 
     pub fn get_difficulty_level(&self) -> u32 {
@@ -121,18 +121,18 @@ mod tests {
     }
 
     #[test]
-    fn life_overflow_test() {
+    fn health_overflow_test() {
         let mut player_data = ScoreAndInfo::new();
-        player_data.remove_life(5000);
+        player_data.remove_health(5000);
 
-        assert_eq!(player_data.get_life(), 0);
+        assert_eq!(player_data.get_health(), 0);
     }
     #[test]
-    fn life_remove_test() {
+    fn health_remove_test() {
         let mut player_data = ScoreAndInfo::new();
-        player_data.remove_life(1);
+        player_data.remove_health(1);
 
-        assert_eq!(player_data.get_life(), PLAYER_INITIAL_LIFE-1);
+        assert_eq!(player_data.get_health(), INITIAL_PLAYER_HEALTH-1);
     }
 
     #[test]
@@ -156,6 +156,7 @@ mod tests {
 
     #[test]
     fn percent_test() {
+        // This test can be problematic (Usage of sleep of 1 second). It is header to test if the "Percent" system works
         let mut player_data = ScoreAndInfo::new();
 
         let one_second = Duration::from_secs(1);
