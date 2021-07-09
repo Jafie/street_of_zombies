@@ -49,6 +49,15 @@ pub trait MoveableSprite {
     ///
     fn set_new_position(&mut self, position: (f32, f32));
 
+    /// Get the hitbox size of the MoveableCharacter in format (x, y)
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let hitbox : (f32, f32) = my_moveable_sprit.get_hitbox_size();
+    /// ```
+    fn get_hitbox_size(&self) -> (f32, f32);
+
     /// Move the sprite to a new position.
     ///
     /// # Arguments

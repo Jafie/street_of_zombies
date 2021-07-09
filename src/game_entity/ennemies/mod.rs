@@ -13,6 +13,7 @@ static LIMIT_OF_FIRE: u32 = 500;
 static FIRE_RATE: f32 = 0.5;
 static INITIAL_HEALTH_POINTS: i32 = 3;
 static DEATH_POINT_COEF: u32 = 4;
+static DEFAULT_ENNEMY_HITBOX_SIZE: (f32, f32) = (40., 50.);
 
 struct EnnemyInternalData {
     speed: f32,
@@ -25,7 +26,7 @@ struct EnnemyInternalData {
     tick_elapsed: f32,
     cooldown_tick: f32,
     points_per_hits: u32,
-    ennemy_hitbox_size: (f32, f32)
+    hitbox_size: (f32, f32)
 }
 
 /// An ennemy entity - An Ennemy object contains all the data necessary for a single ennemy
@@ -48,6 +49,9 @@ impl MoveableSprite for Ennemy {
     }
     fn set_new_position(&mut self, position: (f32, f32)) {
         self.internal_data.current_position = position;
+    }
+    fn get_hitbox_size(&self) -> (f32, f32) {
+        self.internal_data.hitbox_size
     }
 }
 
@@ -77,7 +81,7 @@ impl Ennemy {
                             tick_elapsed: 0.,
                             cooldown_tick: 2.5,
                             points_per_hits: points,
-                            ennemy_hitbox_size: (40., 50.)
+                            hitbox_size: DEFAULT_ENNEMY_HITBOX_SIZE
             }
         }
     }
@@ -169,10 +173,6 @@ impl Ennemy {
     pub fn get_point_value_on_death(&self) -> u32 {
         self.internal_data.points_per_hits*DEATH_POINT_COEF
     }
-
-    pub fn get_hitbox_size(&self) -> (f32, f32) {
-        self.internal_data.ennemy_hitbox_size
-    }
 }
 
 
@@ -242,6 +242,13 @@ mod tests {
         let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
         ennemy.set_new_position((60., 40.));
         assert_eq!(ennemy.get_position(), (60., 40.));
+    }
+
+    #[test]
+    fn ennemy_get_hitbox_size() {
+        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let hitbox_size = ennemy.get_hitbox_size();
+        assert_eq!(hitbox_size, DEFAULT_ENNEMY_HITBOX_SIZE);
     }
 
     #[test]

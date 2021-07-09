@@ -11,6 +11,7 @@ static PROJECTILE_SPEED: f32 = 700.0;
 static AMO_IN_WEAPON: u32 = 800;
 static LIMIT_OF_FIRE: u32 = 700;
 static FIRE_RATE: f32 = 0.18;
+static DEFAULT_PLAYER_HITBOX_SIZE : (f32, f32) = (35., 40.);
 
 /// The Main Character entity, Controllable by the player. - A Player object contains all the information dedicated to a the player.
 pub struct Player {
@@ -21,6 +22,7 @@ struct PlayerInternal {
     speed: f32,
     current_position : (f32, f32),
     direction: (f32, f32),
+    hitbox_size: (f32, f32),
     current_weapon: Box<dyn Weapon + Send + Sync>
 }
 
@@ -39,6 +41,9 @@ impl MoveableSprite for Player {
     }
     fn set_new_position(&mut self, position: (f32, f32)) {
         self.player_data.current_position = position;
+    }
+    fn get_hitbox_size(&self) -> (f32, f32) {
+        self.player_data.hitbox_size
     }
 }
 
@@ -61,6 +66,7 @@ impl Player {
                             speed: speed_to_set,
                             current_position: initial_pos,
                             direction: direction_to_set,
+                            hitbox_size: DEFAULT_PLAYER_HITBOX_SIZE,
                             current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
                         }
         }
@@ -131,6 +137,13 @@ mod tests {
         let mut player = Player::new(500.0, (5., 10.), (15., 20.));
         player.set_new_position((60., 40.));
         assert_eq!(player.get_position(), (60., 40.));
+    }
+
+    #[test]
+    fn player_get_hitbox_size() {
+        let player = Player::new(500.0, (5., 10.), (15., 20.));
+        let hitbox_size = player.get_hitbox_size();
+        assert_eq!(hitbox_size, DEFAULT_PLAYER_HITBOX_SIZE);
     }
 
     #[test]

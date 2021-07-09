@@ -2,12 +2,15 @@ use crate::game_entity::MoveableSprite;
 use crate::game_system::math_and_generator;
 
 
+static DEFAULT_PROJECTILE_HITBOX: (f32, f32) = (10., 10.);
+
 struct ProjectileInternalData {
     speed: f32,
     direction: (f32, f32),
     initial_position : (f32, f32),
     current_position : (f32, f32),
     projectile_limit_distance: u32,
+    hitbox_size: (f32, f32),
     is_from_ennemy: bool
 }
 
@@ -37,6 +40,7 @@ impl Projectile {
                 initial_position: current_position_to_set,
                 current_position: current_position_to_set,
                 projectile_limit_distance: limit_of_fire,
+                hitbox_size: DEFAULT_PROJECTILE_HITBOX,
                 is_from_ennemy: is_from_ennemy
             }
         }
@@ -87,6 +91,9 @@ impl MoveableSprite for Projectile {
     fn set_new_position(&mut self, position: (f32, f32)) {
         self.internal_data.current_position = position;
     }
+    fn get_hitbox_size(&self) -> (f32, f32) {
+        self.internal_data.hitbox_size
+    }
 }
 
 #[cfg(test)]
@@ -128,6 +135,13 @@ mod tests {
         assert_eq!(projectile.get_position(), (60., 40.));
     }
     
+    #[test]
+    fn projectile_get_hitbox_size() {
+        let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
+        let hitbox_size = projectile.get_hitbox_size();
+        assert_eq!(hitbox_size, DEFAULT_PROJECTILE_HITBOX);
+    }
+
     #[test]
     fn projectile_out_of_fire_position() {
         let mut projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
