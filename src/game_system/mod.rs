@@ -24,16 +24,40 @@ static INITIAL_PLAYER_POSITION_Y: f32 = -215.0;
 static INITIAL_PLAYER_SPEED: f32 = 350.0;
 static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
 
+pub struct StreetOfZombiesEngine;
+
+impl Plugin for StreetOfZombiesEngine {
+    fn build(&self, app: &mut AppBuilder) {
+        app
+        .add_startup_system(setup.system())
+        .add_startup_system(set_window_parameters.system())
+        .add_system(keyboard_capture.system())
+        .add_system(projectile_and_kill_gameplay::projectile_movement_system.system())
+        .add_system(projectile_and_kill_gameplay::projectile_collision_and_score_system.system())
+        .add_system(ennemy_spawn_ai_gameplay::ennemy_ai_system.system())
+        .add_system(animate_sprite_system.system())
+        .run();
+    }
+}
+
+
 /// Initial setup
 pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // cameras
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(UiCameraBundle::default());
 
+    // Background image
+    let background_image: Handle<Texture> = asset_server.load("images/background_street_of_zombies.png");
+    commands.spawn_bundle(SpriteBundle {
+            material: materials.add(background_image.into()),
+            ..Default::default()
+        });
 
     // Hidden ennemy (quick texture load)
     // This is a "pre-load" of the zombie texture.
@@ -172,6 +196,14 @@ pub fn is_next_movement_out_of_game_area(position: (f32, f32), direction_factor:
     
     next_movement_coord.0 > GAME_AREA_LIMIT_X || next_movement_coord.1 > GAME_AREA_LIMIT_Y
 }
+
+/// This "Startup-Item" modify the Window parameter (title and no-resize)
+fn set_window_parameters(mut windows: ResMut<Windows>) {
+    let window = windows.get_primary_mut().unwrap();
+    window.set_title(String::from("Street of Zombies"));
+    window.set_resizable(false);
+}
+
 
 #[cfg(test)]
 mod tests {

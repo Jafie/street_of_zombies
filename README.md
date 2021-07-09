@@ -21,14 +21,14 @@ With Rust installed, a simple "cargo run" is necessary to run the game.
 - [x] Ennemy movements.
 - [x] Ennemy spawn.
 - [x] Ennemy AI (currently, simple movements)
-- [ ] Sprite usage.
+- [x] Sprite usage.
 - [x] Map limit.
 - [ ] Bonus (Change weapons and Projectile types).
 - [x] Scoreboard + Player health.
 
 ## Screenshots and Gameplay
 
-![image](https://drive.google.com/uc?export=view&id=1e_2IazAyS63btX_7Z9G5nhLw6RYqovHC)
+![image](https://drive.google.com/uc?export=view&id=1CFA4GKzNX9vR14ToMPwrb1tVhlxmrKY-)
 
 ## Credits
 

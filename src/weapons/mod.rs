@@ -62,10 +62,10 @@ pub trait Weapon {
             let (pos_x, pox_y) = initial_pos;
             let asset_color;
             if is_ennemy {
-                asset_color = Color::rgb(1.0, 0.0, 0.3).into();
+                asset_color = Color::rgb(1.0, 0.0, 0.0).into();
             }
             else {
-                asset_color = Color::rgb(0.3, 0.0, 1.0).into();
+                asset_color = Color::rgb(0.0, 0.0, 1.0).into();
             }
 
             commands

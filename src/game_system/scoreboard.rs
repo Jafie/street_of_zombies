@@ -5,6 +5,8 @@ use bevy::{
     prelude::*
 };
 
+use crate::{GAME_RESOLUTION_HEIGHT, GAME_RESOLUTION_WIDTH};
+
 
 static INITIAL_PLAYER_HEALTH: u32 = 5;
 static MAX_DIFFICULTY_LEVEL: u32 = 5;
@@ -60,19 +62,27 @@ impl ScoreAndInfo {
         self.score_data.percent_until_next_level = percent_elapsed;
     }
 
-    pub fn update_scoarboard_text(&self, text: &mut Text) {
+    pub fn update_scoarboard_text(&self, text: &mut Text, style: &mut Style) {
         let difficulty_level_list = vec!("EASY", "NORMAL", "HARD", "EXTREME", "STILL OK?", "!YOU ARE GOING TO DIE!");
-
-
-        text.sections[0].value = format!("SCORE: {:10}", self.get_score());
-        text.sections[1].value = format!("    -  HEALTH: {:2}", self.get_health());
 
         let difficulty_text = match difficulty_level_list.get(self.score_data.difficulty_level as usize) {
             Some(difficulty_level) => difficulty_level,
             None => "UNKNOWN"
         };
 
+        if self.is_gameover() {
+            self.print_board_game_over(text, style);
+        }
+        else {
+            self.print_board_continue(text, difficulty_text);
+        }
+    }
+
+    fn print_board_continue(&self, text: &mut Text, difficulty_text: &str) {
+        text.sections[0].value = format!("SCORE: {:10}", self.get_score());
+        text.sections[1].value = format!("    -  HEALTH: {:2}", self.get_health());
         text.sections[2].value = format!("    -  DIFFICULTY : {:30}  -  {:3}%", difficulty_text, self.get_percent_until_next_difficulty_level());
+
     }
 
     fn get_score(&self) -> u32 {
@@ -81,6 +91,10 @@ impl ScoreAndInfo {
 
     fn get_health(&self) -> u32 {
         self.score_data.health
+    }
+
+    pub fn is_gameover(&self) -> bool {
+        self.score_data.health == 0
     }
 
     pub fn get_difficulty_level(&self) -> u32 {
@@ -102,7 +116,18 @@ impl ScoreAndInfo {
             self.score_data.difficulty_level = MAX_DIFFICULTY_LEVEL;
         }
     }
+
+    fn print_board_game_over(&self, text: &mut Text, style: &mut Style) {
+        style.position.top =  Val::Px(GAME_RESOLUTION_HEIGHT/2.);
+        style.position.left =  Val::Px(GAME_RESOLUTION_WIDTH/4.);
+        text.sections[0].value = format!("- GAME OVER -    ");
+        text.sections[1].value = format!("Score =  {:10}", self.get_score());
+        text.sections[2].value = format!("    - GAME OVER -");
+
+    }
+    
 }
+
 
 
 #[cfg(test)]
@@ -166,5 +191,21 @@ mod tests {
         let percent_for_one_sec = 100 / SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY;
 
         assert_eq!(player_data.get_percent_until_next_difficulty_level() >= percent_for_one_sec, true);
+    }
+
+    #[test]
+    fn game_over_test() {
+        let mut player_data = ScoreAndInfo::new();
+
+        player_data.remove_health(INITIAL_PLAYER_HEALTH);
+
+        assert_eq!(player_data.is_gameover(), true);
+    }
+
+    #[test]
+    fn game_continue_test() {
+        let player_data = ScoreAndInfo::new();
+
+        assert_eq!(player_data.is_gameover(), false);
     }
 }

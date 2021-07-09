@@ -36,10 +36,10 @@ pub fn projectile_collision_and_score_system(
         Query<(&mut player::Player, Entity)>
     )>,
     projectile_query: Query<(Entity, &projectiles::Projectile)>,
-    mut scoreboard_query: Query<(&mut scoreboard::ScoreAndInfo, &mut Text)>
+    mut scoreboard_query: Query<(&mut scoreboard::ScoreAndInfo, &mut Text, &mut Style)>
 ) 
 { 
-    let (mut score_struct, mut score_text) = scoreboard_query.single_mut().unwrap();
+    let (mut score_struct, mut score_text, mut style_text) = scoreboard_query.single_mut().unwrap();
 
     // check collision with objects
     for (collider_entity, projectile) in projectile_query.iter() {
@@ -60,7 +60,7 @@ pub fn projectile_collision_and_score_system(
     }
 
     score_struct.update_percent_until_next_level();
-    score_struct.update_scoarboard_text(&mut score_text);
+    score_struct.update_scoarboard_text(&mut score_text, &mut style_text);
 }
 
 
@@ -92,13 +92,14 @@ fn check_collision_with_player(
     projectile_entity: &Entity,
     score_struct: &mut scoreboard::ScoreAndInfo) {
     
-    for (player, _) in entity_query.iter_mut() {
+    for (player, entity_player) in entity_query.iter_mut() {
         let sprite_interface_one = player.get_moveable_interface();
         let sprite_interface_two = projectile.get_moveable_interface();
 
         if is_entities_collides(&sprite_interface_one, sprite_interface_two) {
                 commands.entity(*projectile_entity).despawn();
                 score_struct.remove_health(1);
+                check_and_treat_player_health(commands, entity_player, score_struct);
         }
     }
 }
@@ -111,6 +112,11 @@ fn check_and_treat_ennemy_health(commands: &mut Commands, ennemy: &mut ennemies:
     }
 }
 
+fn check_and_treat_player_health(commands: &mut Commands, player_entity: Entity, score: &mut scoreboard::ScoreAndInfo) {
+    if score.is_gameover() {
+        commands.entity(player_entity).despawn();
+    }
+}
 
 /// Retrieve the position and the hitbox converted in "Bevy" format from a "Moveable Sprite"
 /// The format retrieved is a Tuple ((Position_x, Position_y, 0.), (Hibox_x, Hitbox_y))
