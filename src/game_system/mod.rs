@@ -35,6 +35,18 @@ pub fn setup(
     commands.spawn_bundle(UiCameraBundle::default());
 
 
+    // Hidden ennemy (quick texture load)
+    // This is a "pre-load" of the zombie texture.
+    // Avoid to show a "Zombies" with a player Sprite for few milliseconds.
+    commands
+    .spawn_bundle(SpriteSheetBundle {
+        texture_atlas: generate_texture(&asset_server, &mut texture_atlases, TextureToGenerate::ZOMBIE),
+        transform: Transform::from_xyz(GAME_AREA_LIMIT_X+50., GAME_AREA_LIMIT_Y+50., 0.0),
+        sprite: TextureAtlasSprite::new(1),
+        visible: Visible { is_transparent: true, is_visible: false},
+        ..Default::default()
+    });
+
     // Main character
     commands
         .spawn_bundle(SpriteSheetBundle {
@@ -47,6 +59,7 @@ pub fn setup(
             INITIAL_PLAYER_DIRECTION,
             (INITIAL_PLAYER_POSITION_X, INITIAL_PLAYER_POSITION_Y)))
         .insert(Timer::from_seconds(0.1, true));
+
 
     // Scoreboard
     commands.spawn_bundle(TextBundle {
