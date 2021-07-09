@@ -16,12 +16,12 @@ pub fn projectile_movement_system(
 
     for projectile_single_query in projectile_query.iter_mut() {
         let (mut projectile, mut transform, projectile_entity) = projectile_single_query;
-        let direction_of_fire = projectile.get_direction();
-        projectile.move_sprite(&time, &direction_of_fire, &mut transform.translation);
+        let direction_of_fire = projectile.get_moveable_interface().get_direction();
+        projectile.get_moveable_interface_mut().move_sprite(&time, &direction_of_fire, &mut transform.translation);
 
         // If outside of game area, delete
         if (projectile.is_out_of_distance())
-        || is_next_movement_out_of_game_area(projectile.get_position(), projectile.get_direction()) {
+        || is_next_movement_out_of_game_area(projectile.get_moveable_interface().get_position(), projectile.get_moveable_interface().get_direction()) {
             commands.entity(projectile_entity).despawn();
         }
     }
@@ -72,7 +72,10 @@ fn check_collision_with_ennemy(
     score_struct: &mut scoreboard::ScoreAndInfo) {
 
     for (mut ennemy, entity_ennemy) in entity_query.iter_mut() {
-        if is_entities_collides(&ennemy as &ennemies::Ennemy, projectile) {
+        let sprite_interface_one = ennemy.get_moveable_interface();
+        let sprite_interface_two = projectile.get_moveable_interface();
+
+        if is_entities_collides(&sprite_interface_one, sprite_interface_two) {
                 commands.entity(*projectile_entity).despawn();
                 ennemy.reduce_health();
                 score_struct.add_to_score(ennemy.get_point_value_per_hits());
@@ -90,7 +93,10 @@ fn check_collision_with_player(
     score_struct: &mut scoreboard::ScoreAndInfo) {
     
     for (player, _) in entity_query.iter_mut() {
-        if is_entities_collides(&player as &player::Player, projectile) {
+        let sprite_interface_one = player.get_moveable_interface();
+        let sprite_interface_two = projectile.get_moveable_interface();
+
+        if is_entities_collides(&sprite_interface_one, sprite_interface_two) {
                 commands.entity(*projectile_entity).despawn();
                 score_struct.remove_health(1);
         }
@@ -115,8 +121,8 @@ fn check_and_treat_ennemy_health(commands: &mut Commands, ennemy: &mut ennemies:
 ///    let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
 ///    let (projectile_position, projectile_hitbox) = get_position_and_hitboxes(&projectile);
 /// ```
-fn get_position_and_hitboxes<T: MoveableSprite>(
-    entity: &T
+fn get_position_and_hitboxes(
+    entity: &MoveableSprite
 ) -> (Vec3, Vec2) {
 
     let position = entity.get_position();
@@ -135,9 +141,9 @@ fn get_position_and_hitboxes<T: MoveableSprite>(
 ///    let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
 ///    assert_eq!(is_entities_collides(&ennemy, &projectile), true);
 /// ```
-fn is_entities_collides<T: MoveableSprite, U: MoveableSprite>(
-    first_entity: &T,
-    second_entity: &U,
+fn is_entities_collides(
+    first_entity: &MoveableSprite,
+    second_entity: &MoveableSprite,
 ) -> bool {
     let (position_1, hitbox_1) = get_position_and_hitboxes(first_entity);
     let (position_2, hitbox_2) = get_position_and_hitboxes(second_entity);
@@ -160,7 +166,7 @@ mod tests {
     #[test]
     fn get_position_from_moveable_sprite() {
         let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
-        let (ennemy_position, _) = get_position_and_hitboxes(&ennemy);
+        let (ennemy_position, _) = get_position_and_hitboxes(ennemy.get_moveable_interface());
 
         assert_eq!(ennemy_position, Vec3::new(15., 20., 0.));
     }
@@ -168,20 +174,21 @@ mod tests {
     #[test]
     fn get_hitbox_from_moveable_sprite() {
         let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
-        let (_, ennemy_hitbox) = get_position_and_hitboxes(&ennemy);
-        let ennemy_hibox = ennemy.get_hitbox_size();
+        let (_, ennemy_hitbox) = get_position_and_hitboxes(ennemy.get_moveable_interface());
+        let ennemy_hibox = ennemy.get_moveable_interface().get_hitbox_size();
 
         assert_eq!(ennemy_hitbox, Vec2::new(ennemy_hibox.0, ennemy_hibox.1));
     }
 
-    // Test not working but method efficient in game...
     /*
+    TODO: Create a convienient test for this case.
+    --- This test doesn't run... No clues why (Bevy engine? Integration issue? However, work correctly during gameplay) ---
     #[test]
     fn two_moveable_sprite_collides() {
         let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
         let player = player::Player::new(500.0, (5., 10.), (15., 20.));
 
-        assert_eq!(is_entities_collides(&ennemy, &player), true);
+        assert_eq!(is_entities_collides(ennemy.get_moveable_interface(), player.get_moveable_interface()), true);
     }
     */
 
@@ -190,6 +197,6 @@ mod tests {
         let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
         let projectile = projectiles::Projectile::new(500.0, (5., 10.), (150., 2000.), 500, false);
 
-        assert_eq!(is_entities_collides(&ennemy, &projectile), false);
+        assert_eq!(is_entities_collides(ennemy.get_moveable_interface(), projectile.get_moveable_interface()), false);
     }
 }

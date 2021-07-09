@@ -154,7 +154,7 @@ pub fn keyboard_capture(
         }
 
         
-        player.move_sprite(&time, &direction, &mut transform.translation);
+        player.get_moveable_interface_mut().move_sprite(&time, &direction, &mut transform.translation);
     }
 }
 
@@ -171,4 +171,19 @@ pub fn is_next_movement_out_of_game_area(position: (f32, f32), direction_factor:
     let next_movement_coord : (f32, f32) = ((position.0 + direction_factor.0).abs(), (position.1 + direction_factor.1).abs());
     
     next_movement_coord.0 > GAME_AREA_LIMIT_X || next_movement_coord.1 > GAME_AREA_LIMIT_Y
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn next_movement_out_of_game_area() {
+        assert_eq!(is_next_movement_out_of_game_area((GAME_AREA_LIMIT_X, GAME_AREA_LIMIT_Y), (1., 1.)), true);
+    }
+
+    #[test]
+    fn next_movement_inside_of_game_area() {
+        assert_eq!(is_next_movement_out_of_game_area((0., 0.), (0., 0.)), false);
+    }
 }

@@ -14,44 +14,44 @@ enum TexturePositionEnum {
     UP
 }
 
-static LINES_PER_SPRITES : usize= 8;
+static COLS_PER_SPRITES : usize= 8;
 
 pub fn animate_sprite_system(
     time: Res<Time>,
     mut query_set: QuerySet<(
-        Query<(&ennemies::Ennemy, &mut Timer, &mut TextureAtlasSprite)>,
-        Query<(&player::Player, &mut Timer, &mut TextureAtlasSprite)>
+        Query<(&mut ennemies::Ennemy, &mut Timer, &mut TextureAtlasSprite)>,
+        Query<(&mut player::Player, &mut Timer, &mut TextureAtlasSprite)>
     )>
 ) {
 
-    for (ennemy, mut timer, mut sprite) in query_set.q0_mut().iter_mut() {
-        animate_sprite(ennemy, &time, &mut timer, &mut sprite);
+    for (mut ennemy, mut timer, mut sprite) in query_set.q0_mut().iter_mut() {
+        animate_sprite(&mut ennemy.get_moveable_interface_mut(), &time, &mut timer, &mut sprite);
     }
 
-    if let Ok((player, mut timer, mut sprite)) = query_set.q1_mut().single_mut() {
-        animate_sprite(player, &time, &mut timer, &mut sprite);
+    if let Ok((mut player, mut timer, mut sprite)) = query_set.q1_mut().single_mut() {
+        animate_sprite(&mut player.get_moveable_interface_mut(), &time, &mut timer, &mut sprite);
     }
 }
 
-fn animate_sprite<T: MoveableSprite>(
-    entity: &T,
+fn animate_sprite(
+    entity: &mut MoveableSprite,
     time: &Res<Time>,
     timer: &mut Timer,
     sprite: &mut Mut<TextureAtlasSprite>
 )
 {
     timer.tick(time.delta());
-    if timer.finished() {
+    if timer.finished() && entity.is_sprite_moved_after_last_call() {
         let coef_val : usize;
 
         match generate_texture_position_from_coeff_factor(entity.get_direction()) {
-            TexturePositionEnum::DOWN => coef_val = 0*LINES_PER_SPRITES,
-            TexturePositionEnum::LEFT => coef_val = 1*LINES_PER_SPRITES,
-            TexturePositionEnum::RIGHT => coef_val = 2*LINES_PER_SPRITES,
-            TexturePositionEnum::UP => coef_val = 3*LINES_PER_SPRITES
+            TexturePositionEnum::DOWN => coef_val = 0*COLS_PER_SPRITES,
+            TexturePositionEnum::LEFT => coef_val = 1*COLS_PER_SPRITES,
+            TexturePositionEnum::RIGHT => coef_val = 2*COLS_PER_SPRITES,
+            TexturePositionEnum::UP => coef_val = 3*COLS_PER_SPRITES
         }
 
-        let calculated_index =  (((sprite.index as usize + 1) % 8) + coef_val) as u32;
+        let calculated_index =  (((sprite.index as usize + 1) % COLS_PER_SPRITES) + coef_val) as u32;
         sprite.index = calculated_index;
     }
 }

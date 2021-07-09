@@ -29,13 +29,13 @@ fn movement_of_ennemies(
     time: &Res<Time>,
     ennemy_query: &mut Query<(&mut ennemies::Ennemy, &mut Transform)>) {
         for (mut ennemy, mut ennemy_transform) in ennemy_query.iter_mut() {
-            let ennemy_direction = ennemy.get_direction();
-            ennemy.move_sprite(time, &ennemy_direction, &mut ennemy_transform.translation);
+            let ennemy_direction = ennemy.get_moveable_interface().get_direction();
+            ennemy.get_moveable_interface_mut().move_sprite(time, &ennemy_direction, &mut ennemy_transform.translation);
     
-            if (math_and_generator::calculate_cartesian_distance(ennemy.get_initial_position(), ennemy.get_position()) > MAXIMUM_ENNEMY_DISTANCE)
-                || (is_next_movement_out_of_game_area(ennemy.get_position(), ennemy_direction)) {
+            if (math_and_generator::calculate_cartesian_distance(ennemy.get_initial_position(), ennemy.get_moveable_interface().get_position()) > MAXIMUM_ENNEMY_DISTANCE)
+                || (is_next_movement_out_of_game_area(ennemy.get_moveable_interface().get_position(), ennemy_direction)) {
                 // Reverse direction
-                ennemy.set_new_direction((-ennemy_direction.0, -ennemy_direction.1));
+                ennemy.get_moveable_interface_mut().set_new_direction((-ennemy_direction.0, -ennemy_direction.1));
             }
     
             // Attack

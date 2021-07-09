@@ -1,21 +1,29 @@
 use crate::game_entity::MoveableSprite;
+use crate::game_entity::MoveableSpriteTrait;
+
 use crate::game_system::math_and_generator;
 
 
 static DEFAULT_PROJECTILE_HITBOX: (f32, f32) = (10., 10.);
 
 struct ProjectileInternalData {
-    speed: f32,
-    direction: (f32, f32),
-    initial_position : (f32, f32),
-    current_position : (f32, f32),
     projectile_limit_distance: u32,
-    hitbox_size: (f32, f32),
     is_from_ennemy: bool
 }
 
 pub struct Projectile {
+    sprite_data: MoveableSprite,
     internal_data: ProjectileInternalData
+}
+
+impl MoveableSpriteTrait for Projectile{
+    fn get_moveable_interface(&self) -> &MoveableSprite {
+        &self.sprite_data
+    }
+
+    fn get_moveable_interface_mut(&mut self) -> &mut MoveableSprite {
+        &mut self.sprite_data
+    }
 }
 
 impl Projectile {
@@ -35,14 +43,10 @@ impl Projectile {
     /// ```
     pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), current_position_to_set: (f32, f32), limit_of_fire: u32, is_from_ennemy: bool) -> Self {
         Projectile { internal_data: ProjectileInternalData {
-                speed: speed_to_set,
-                direction: direction_to_set,
-                initial_position: current_position_to_set,
-                current_position: current_position_to_set,
                 projectile_limit_distance: limit_of_fire,
-                hitbox_size: DEFAULT_PROJECTILE_HITBOX,
                 is_from_ennemy: is_from_ennemy
-            }
+            },
+            sprite_data: MoveableSprite::new(speed_to_set, direction_to_set, current_position_to_set, DEFAULT_PROJECTILE_HITBOX),
         }
     }
 
@@ -56,7 +60,7 @@ impl Projectile {
     ///    assert_eq!(projectile.is_out_of_distance(), true);
     /// ```
     pub fn is_out_of_distance(&self) -> bool {
-        let distance_walked = math_and_generator::calculate_cartesian_distance(self.internal_data.initial_position, self.internal_data.current_position);
+        let distance_walked = math_and_generator::calculate_cartesian_distance(self.sprite_data.internal_data.initial_position, self.sprite_data.internal_data.current_position);
 
         let result = distance_walked > (self.internal_data.projectile_limit_distance as f32);
         result
@@ -75,84 +79,21 @@ impl Projectile {
     }
 }
 
-impl MoveableSprite for Projectile {
-    fn get_speed(&self) -> f32 {
-        self.internal_data.speed
-    }
-    fn set_new_direction(&mut self, direction: (f32, f32)) {
-        self.internal_data.direction = direction;
-    }
-    fn get_direction(&self) -> (f32, f32) {
-        self.internal_data.direction
-    }
-    fn get_position(&self) -> (f32, f32) {
-        self.internal_data.current_position
-    }
-    fn set_new_position(&mut self, position: (f32, f32)) {
-        self.internal_data.current_position = position;
-    }
-    fn get_hitbox_size(&self) -> (f32, f32) {
-        self.internal_data.hitbox_size
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn projectile_initial_speed() {
-        let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-
-        assert_eq!(projectile.get_speed(), 500.0);
-    }
-
-    #[test]
-    fn projectile_initial_direction() {
-        let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-
-        assert_eq!(projectile.get_direction(), (5., 10.));
-    }
-
-    #[test]
-    fn projectile_initial_position() {
-        let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-
-        assert_eq!(projectile.get_position(), (15., 20.));
-    }
-
-    #[test]
-    fn projectile_set_direction() {
-        let mut projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-        projectile.set_new_direction((100., 45.));
-        assert_eq!(projectile.get_direction(), (100., 45.));
-    }
-
-    #[test]
-    fn projectile_set_position() {
-        let mut projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-        projectile.set_new_position((60., 40.));
-        assert_eq!(projectile.get_position(), (60., 40.));
-    }
-    
-    #[test]
-    fn projectile_get_hitbox_size() {
-        let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-        let hitbox_size = projectile.get_hitbox_size();
-        assert_eq!(hitbox_size, DEFAULT_PROJECTILE_HITBOX);
-    }
-
     #[test]
     fn projectile_out_of_fire_position() {
         let mut projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-        projectile.set_new_position((600., 600.));
+        projectile.sprite_data.set_new_position((600., 600.));
         assert_eq!(projectile.is_out_of_distance(), true);
     }
 
     #[test]
     fn projectile_still_in_fire() {
         let mut projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-        projectile.set_new_position((50., 20.));
+        projectile.sprite_data.set_new_position((50., 20.));
         assert_eq!(projectile.is_out_of_distance(), false);
     }
 
