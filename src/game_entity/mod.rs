@@ -1,26 +1,23 @@
+pub mod ennemies;
 pub mod player;
 pub mod projectiles;
-pub mod ennemies;
 
 use crate::game_system::GAME_AREA_LIMIT_X;
 use crate::game_system::GAME_AREA_LIMIT_Y;
 
-use bevy::{
-    prelude::*,
-};
-
+use bevy::prelude::*;
 
 pub struct MoveableSprite {
-    internal_data : MoveableSpriteData
+    internal_data: MoveableSpriteData,
 }
 
 struct MoveableSpriteData {
     speed: f32,
     direction: (f32, f32),
-    initial_position : (f32, f32),
-    current_position : (f32, f32),
-    previous_position : (f32, f32),
-    hitbox_size: (f32, f32)
+    initial_position: (f32, f32),
+    current_position: (f32, f32),
+    previous_position: (f32, f32),
+    hitbox_size: (f32, f32),
 }
 
 pub trait MoveableSpriteTrait {
@@ -28,19 +25,23 @@ pub trait MoveableSpriteTrait {
     fn get_moveable_interface_mut(&mut self) -> &mut MoveableSprite;
 }
 
-
 /// A sprite which is able to move
 impl MoveableSprite {
-    fn new(speed_to_set: f32, direction_to_set: (f32, f32), current_position_to_set: (f32, f32), hitbox_size: (f32, f32)) -> Self {
+    fn new(
+        speed_to_set: f32,
+        direction_to_set: (f32, f32),
+        current_position_to_set: (f32, f32),
+        hitbox_size: (f32, f32),
+    ) -> Self {
         MoveableSprite {
             internal_data: MoveableSpriteData {
                 speed: speed_to_set,
                 direction: direction_to_set,
-                initial_position : current_position_to_set,
-                current_position : current_position_to_set,
-                previous_position : current_position_to_set,
-                hitbox_size: hitbox_size
-            }
+                initial_position: current_position_to_set,
+                current_position: current_position_to_set,
+                previous_position: current_position_to_set,
+                hitbox_size: hitbox_size,
+            },
         }
     }
 
@@ -65,7 +66,7 @@ impl MoveableSprite {
     pub fn get_direction(&self) -> (f32, f32) {
         self.internal_data.direction
     }
-    
+
     /// Set the new direction of a moveable sprite
     ///
     /// # Arguments
@@ -75,7 +76,7 @@ impl MoveableSprite {
     pub fn set_new_direction(&mut self, direction: (f32, f32)) {
         self.internal_data.direction = direction;
     }
-    
+
     /// Get the current position of a moveable sprite in the game area
     pub fn get_position(&self) -> (f32, f32) {
         self.internal_data.current_position
@@ -118,9 +119,9 @@ impl MoveableSprite {
             return true;
         }
 
-        return false
+        return false;
     }
-    
+
     /// Move the sprite to a new position.
     ///
     /// # Arguments
@@ -129,7 +130,12 @@ impl MoveableSprite {
     /// * `direction` - The movement direction.
     /// * `translated_movement` - The "translated movement" returned to bevy engine.
     ///
-    pub fn move_sprite(&mut self, time: &Res<Time>, direction: &(f32, f32), translated_movement: &mut bevy::prelude::Vec3) {
+    pub fn move_sprite(
+        &mut self,
+        time: &Res<Time>,
+        direction: &(f32, f32),
+        translated_movement: &mut bevy::prelude::Vec3,
+    ) {
         // move the sprite
         translated_movement.x += time.delta_seconds() * direction.0 * &self.get_speed();
         translated_movement.y += time.delta_seconds() * direction.1 * &self.get_speed();
@@ -148,10 +154,15 @@ impl MoveableSprite {
 /// * `translated_movement` - The "translated movement" returned to bevy engine.
 ///
 fn position_to_game_area_limit(translated_movement: &mut bevy::prelude::Vec3) {
-    translated_movement.x = translated_movement.x.min(GAME_AREA_LIMIT_X).max(-GAME_AREA_LIMIT_X);
-    translated_movement.y = translated_movement.y.min(GAME_AREA_LIMIT_Y).max(-GAME_AREA_LIMIT_Y);
+    translated_movement.x = translated_movement
+        .x
+        .min(GAME_AREA_LIMIT_X)
+        .max(-GAME_AREA_LIMIT_X);
+    translated_movement.y = translated_movement
+        .y
+        .min(GAME_AREA_LIMIT_Y)
+        .max(-GAME_AREA_LIMIT_Y);
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -228,7 +239,8 @@ mod tests {
 
     #[test]
     fn outside_game_limit_test() {
-        let mut vect_in_game_are = Vec3::new(GAME_AREA_LIMIT_X + 50.0, GAME_AREA_LIMIT_Y + 50.0, 0.0);
+        let mut vect_in_game_are =
+            Vec3::new(GAME_AREA_LIMIT_X + 50.0, GAME_AREA_LIMIT_Y + 50.0, 0.0);
         position_to_game_area_limit(&mut vect_in_game_are);
 
         assert_eq!(vect_in_game_are.x, GAME_AREA_LIMIT_X);

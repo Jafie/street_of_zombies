@@ -1,35 +1,35 @@
 use instant::*;
 
-
-use bevy::{
-    prelude::*
-};
+use bevy::prelude::*;
 
 use crate::{GAME_RESOLUTION_HEIGHT, GAME_RESOLUTION_WIDTH};
-
 
 static INITIAL_PLAYER_HEALTH: u32 = 5;
 static MAX_DIFFICULTY_LEVEL: u32 = 5;
 static SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY: u32 = 60;
-
 
 struct ScoreAndInfoInternal {
     score: u32,
     health: u32,
     percent_until_next_level: u32,
     difficulty_level: u32,
-    start_time: Instant
+    start_time: Instant,
 }
 
 pub struct ScoreAndInfo {
-    score_data: ScoreAndInfoInternal
+    score_data: ScoreAndInfoInternal,
 }
-
 
 impl ScoreAndInfo {
     pub fn new() -> Self {
         ScoreAndInfo {
-            score_data: ScoreAndInfoInternal {score: 0, health: INITIAL_PLAYER_HEALTH, difficulty_level: 0, percent_until_next_level: 0, start_time: Instant::now()}
+            score_data: ScoreAndInfoInternal {
+                score: 0,
+                health: INITIAL_PLAYER_HEALTH,
+                difficulty_level: 0,
+                percent_until_next_level: 0,
+                start_time: Instant::now(),
+            },
         }
     }
 
@@ -41,7 +41,7 @@ impl ScoreAndInfo {
         let remove_health_result = self.score_data.health.overflowing_sub(health_to_remove);
         match remove_health_result {
             (new_health, false) => self.score_data.health = new_health,
-            (_, true) => self.score_data.health = 0
+            (_, true) => self.score_data.health = 0,
         }
     }
 
@@ -50,8 +50,9 @@ impl ScoreAndInfo {
             return;
         }
 
-        let second_for_next_difficulty_level  = SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY as u64;
-        let mut percent_elapsed = ((self.score_data.start_time.elapsed().as_secs()*100) / second_for_next_difficulty_level) as u32;
+        let second_for_next_difficulty_level = SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY as u64;
+        let mut percent_elapsed = ((self.score_data.start_time.elapsed().as_secs() * 100)
+            / second_for_next_difficulty_level) as u32;
 
         if percent_elapsed >= 100 {
             self.score_data.start_time = Instant::now();
@@ -63,17 +64,24 @@ impl ScoreAndInfo {
     }
 
     pub fn update_scoarboard_text(&self, text: &mut Text, style: &mut Style) {
-        let difficulty_level_list = vec!("EASY", "NORMAL", "HARD", "EXTREME", "STILL OK?", "!YOU ARE GOING TO DIE!");
+        let difficulty_level_list = vec![
+            "EASY",
+            "NORMAL",
+            "HARD",
+            "EXTREME",
+            "STILL OK?",
+            "!YOU ARE GOING TO DIE!",
+        ];
 
-        let difficulty_text = match difficulty_level_list.get(self.score_data.difficulty_level as usize) {
-            Some(difficulty_level) => difficulty_level,
-            None => "UNKNOWN"
-        };
+        let difficulty_text =
+            match difficulty_level_list.get(self.score_data.difficulty_level as usize) {
+                Some(difficulty_level) => difficulty_level,
+                None => "UNKNOWN",
+            };
 
         if self.is_gameover() {
             self.print_board_game_over(text, style);
-        }
-        else {
+        } else {
             self.print_board_continue(text, difficulty_text);
         }
     }
@@ -81,8 +89,11 @@ impl ScoreAndInfo {
     fn print_board_continue(&self, text: &mut Text, difficulty_text: &str) {
         text.sections[0].value = format!("SCORE: {:10}", self.get_score());
         text.sections[1].value = format!("    -  HEALTH: {:2}", self.get_health());
-        text.sections[2].value = format!("    -  DIFFICULTY : {:30}  -  {:3}%", difficulty_text, self.get_percent_until_next_difficulty_level());
-
+        text.sections[2].value = format!(
+            "    -  DIFFICULTY : {:30}  -  {:3}%",
+            difficulty_text,
+            self.get_percent_until_next_difficulty_level()
+        );
     }
 
     fn get_score(&self) -> u32 {
@@ -105,7 +116,7 @@ impl ScoreAndInfo {
         if self.score_data.difficulty_level == MAX_DIFFICULTY_LEVEL {
             return 666;
         }
-    
+
         self.score_data.percent_until_next_level
     }
 
@@ -118,24 +129,20 @@ impl ScoreAndInfo {
     }
 
     fn print_board_game_over(&self, text: &mut Text, style: &mut Style) {
-        style.position.top =  Val::Px(GAME_RESOLUTION_HEIGHT/2.);
-        style.position.left =  Val::Px(GAME_RESOLUTION_WIDTH/4.);
+        style.position.top = Val::Px(GAME_RESOLUTION_HEIGHT / 2.);
+        style.position.left = Val::Px(GAME_RESOLUTION_WIDTH / 4.);
         text.sections[0].value = format!("- GAME OVER -    ");
         text.sections[1].value = format!("Score =  {:10}", self.get_score());
         text.sections[2].value = format!("    - GAME OVER -");
-
     }
-    
 }
-
-
 
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use std::time::{Duration};
     use std::thread;
+    use std::time::Duration;
 
     #[test]
     fn score_board_add_system_test() {
@@ -157,7 +164,7 @@ mod tests {
         let mut player_data = ScoreAndInfo::new();
         player_data.remove_health(1);
 
-        assert_eq!(player_data.get_health(), INITIAL_PLAYER_HEALTH-1);
+        assert_eq!(player_data.get_health(), INITIAL_PLAYER_HEALTH - 1);
     }
 
     #[test]
@@ -172,7 +179,7 @@ mod tests {
     fn increase_difficulty_level_to_max_test() {
         let mut player_data = ScoreAndInfo::new();
 
-        for _ in 0..MAX_DIFFICULTY_LEVEL+5 {
+        for _ in 0..MAX_DIFFICULTY_LEVEL + 5 {
             player_data.increase_difficulty_level();
         }
 
@@ -190,7 +197,10 @@ mod tests {
 
         let percent_for_one_sec = 100 / SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY;
 
-        assert_eq!(player_data.get_percent_until_next_difficulty_level() >= percent_for_one_sec, true);
+        assert_eq!(
+            player_data.get_percent_until_next_difficulty_level() >= percent_for_one_sec,
+            true
+        );
     }
 
     #[test]

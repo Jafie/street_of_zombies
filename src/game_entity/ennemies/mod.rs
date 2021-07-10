@@ -1,13 +1,10 @@
 use crate::game_entity::MoveableSprite;
 use crate::game_entity::MoveableSpriteTrait;
 
-use crate::weapons::Weapon;
 use crate::weapons::Pistol;
+use crate::weapons::Weapon;
 
-use bevy::{
-    prelude::*
-};
-
+use bevy::prelude::*;
 
 // Default pistol weapon data
 static PROJECTILE_SPEED: f32 = 300.0;
@@ -30,10 +27,10 @@ struct EnnemyInternalData {
 /// An ennemy entity - An Ennemy object contains all the data necessary for a single ennemy
 pub struct Ennemy {
     sprite_data: MoveableSprite,
-    internal_data: EnnemyInternalData
+    internal_data: EnnemyInternalData,
 }
 
-impl MoveableSpriteTrait for Ennemy{
+impl MoveableSpriteTrait for Ennemy {
     fn get_moveable_interface(&self) -> &MoveableSprite {
         &self.sprite_data
     }
@@ -57,20 +54,36 @@ impl Ennemy {
     /// ```
     ///     let ennemy = let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
     /// ```
-    pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32), fire_direction: (f32, f32), points: u32) -> Self {
-        Ennemy { internal_data: EnnemyInternalData {
-                            fire_direction: fire_direction,
-                            health: INITIAL_HEALTH_POINTS,
-                            current_weapon: Box::new(Pistol::new(PROJECTILE_SPEED, FIRE_RATE, AMO_IN_WEAPON, LIMIT_OF_FIRE)),
-                            tick_elapsed: 0.,
-                            cooldown_tick: 2.5,
-                            points_per_hits: points,
+    pub fn new(
+        speed_to_set: f32,
+        direction_to_set: (f32, f32),
+        initial_pos: (f32, f32),
+        fire_direction: (f32, f32),
+        points: u32,
+    ) -> Self {
+        Ennemy {
+            internal_data: EnnemyInternalData {
+                fire_direction: fire_direction,
+                health: INITIAL_HEALTH_POINTS,
+                current_weapon: Box::new(Pistol::new(
+                    PROJECTILE_SPEED,
+                    FIRE_RATE,
+                    AMO_IN_WEAPON,
+                    LIMIT_OF_FIRE,
+                )),
+                tick_elapsed: 0.,
+                cooldown_tick: 2.5,
+                points_per_hits: points,
             },
-            sprite_data: MoveableSprite::new(speed_to_set, direction_to_set, initial_pos, DEFAULT_ENNEMY_HITBOX_SIZE),
+            sprite_data: MoveableSprite::new(
+                speed_to_set,
+                direction_to_set,
+                initial_pos,
+                DEFAULT_ENNEMY_HITBOX_SIZE,
+            ),
         }
     }
 
-    
     /// Reduce the ennemy health by one
     ///
     /// # Examples
@@ -108,18 +121,27 @@ impl Ennemy {
     /// * `time` - The timer (used for reloading)
     /// * `points` - The number of points valued by the ennemy
     /// ```
-    pub fn launch_attack(&mut self,
+    pub fn launch_attack(
+        &mut self,
         commands: &mut Commands,
         materials: &mut ResMut<Assets<ColorMaterial>>,
-        time: &Res<Time>) {
-            self.internal_data.current_weapon.fire_global(commands, materials, &time, self.internal_data.fire_direction, self.sprite_data.get_position(), true);
+        time: &Res<Time>,
+    ) {
+        self.internal_data.current_weapon.fire_global(
+            commands,
+            materials,
+            &time,
+            self.internal_data.fire_direction,
+            self.sprite_data.get_position(),
+            true,
+        );
 
-            self.internal_data.tick_elapsed += time.delta_seconds();
+        self.internal_data.tick_elapsed += time.delta_seconds();
 
-            if self.internal_data.tick_elapsed > self.internal_data.cooldown_tick {
-                self.internal_data.current_weapon.reload();
-                self.internal_data.tick_elapsed = 0.;
-            }
+        if self.internal_data.tick_elapsed > self.internal_data.cooldown_tick {
+            self.internal_data.current_weapon.reload();
+            self.internal_data.tick_elapsed = 0.;
+        }
     }
 
     /// Get the initial position where the ennemy was created
@@ -155,11 +177,9 @@ impl Ennemy {
     ///     assert_eq!(ennemy.get_point_value_on_death(), 50*DEATH_POINT_COEF);
     /// ```
     pub fn get_point_value_on_death(&self) -> u32 {
-        self.internal_data.points_per_hits*DEATH_POINT_COEF
+        self.internal_data.points_per_hits * DEATH_POINT_COEF
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -183,7 +203,7 @@ mod tests {
     fn ennemy_get_value_on_death() {
         let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
 
-        assert_eq!(ennemy.get_point_value_on_death(), 50*DEATH_POINT_COEF);
+        assert_eq!(ennemy.get_point_value_on_death(), 50 * DEATH_POINT_COEF);
     }
 
     #[test]

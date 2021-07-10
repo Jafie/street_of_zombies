@@ -3,20 +3,19 @@ use crate::game_entity::MoveableSpriteTrait;
 
 use crate::game_system::math_and_generator;
 
-
 static DEFAULT_PROJECTILE_HITBOX: (f32, f32) = (10., 10.);
 
 struct ProjectileInternalData {
     projectile_limit_distance: u32,
-    is_from_ennemy: bool
+    is_from_ennemy: bool,
 }
 
 pub struct Projectile {
     sprite_data: MoveableSprite,
-    internal_data: ProjectileInternalData
+    internal_data: ProjectileInternalData,
 }
 
-impl MoveableSpriteTrait for Projectile{
+impl MoveableSpriteTrait for Projectile {
     fn get_moveable_interface(&self) -> &MoveableSprite {
         &self.sprite_data
     }
@@ -41,12 +40,24 @@ impl Projectile {
     /// ```
     ///     let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
     /// ```
-    pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), current_position_to_set: (f32, f32), limit_of_fire: u32, is_from_ennemy: bool) -> Self {
-        Projectile { internal_data: ProjectileInternalData {
+    pub fn new(
+        speed_to_set: f32,
+        direction_to_set: (f32, f32),
+        current_position_to_set: (f32, f32),
+        limit_of_fire: u32,
+        is_from_ennemy: bool,
+    ) -> Self {
+        Projectile {
+            internal_data: ProjectileInternalData {
                 projectile_limit_distance: limit_of_fire,
-                is_from_ennemy: is_from_ennemy
+                is_from_ennemy: is_from_ennemy,
             },
-            sprite_data: MoveableSprite::new(speed_to_set, direction_to_set, current_position_to_set, DEFAULT_PROJECTILE_HITBOX),
+            sprite_data: MoveableSprite::new(
+                speed_to_set,
+                direction_to_set,
+                current_position_to_set,
+                DEFAULT_PROJECTILE_HITBOX,
+            ),
         }
     }
 
@@ -60,7 +71,10 @@ impl Projectile {
     ///    assert_eq!(projectile.is_out_of_distance(), true);
     /// ```
     pub fn is_out_of_distance(&self) -> bool {
-        let distance_walked = math_and_generator::calculate_cartesian_distance(self.sprite_data.internal_data.initial_position, self.sprite_data.internal_data.current_position);
+        let distance_walked = math_and_generator::calculate_cartesian_distance(
+            self.sprite_data.internal_data.initial_position,
+            self.sprite_data.internal_data.current_position,
+        );
 
         let result = distance_walked > (self.internal_data.projectile_limit_distance as f32);
         result
@@ -78,7 +92,6 @@ impl Projectile {
         self.internal_data.is_from_ennemy
     }
 }
-
 
 #[cfg(test)]
 mod tests {

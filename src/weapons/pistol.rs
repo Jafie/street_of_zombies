@@ -1,16 +1,17 @@
 use crate::game_entity::projectiles::Projectile;
-use crate::weapons::Weapon;
 use crate::weapons::Pistol;
-
+use crate::weapons::Weapon;
 
 impl Weapon for Pistol {
     fn new(projectile_speed: f32, fire_rate: f32, amo: u32, fire_distance: u32) -> Self {
-        Pistol {speed: projectile_speed,
-                current_amo: 0,
-                max_amo: amo,
-                limit_of_fire: fire_distance,
-                initial_fire_rate: fire_rate,
-                current_fire_rate_timer: 0.0}
+        Pistol {
+            speed: projectile_speed,
+            current_amo: 0,
+            max_amo: amo,
+            limit_of_fire: fire_distance,
+            initial_fire_rate: fire_rate,
+            current_fire_rate_timer: 0.0,
+        }
     }
 
     fn reload(&mut self) {
@@ -27,7 +28,7 @@ impl Weapon for Pistol {
         if self.current_fire_rate_timer < 0.0 {
             self.current_fire_rate_timer = self.initial_fire_rate;
             return true;
-        } 
+        }
 
         false
     }
@@ -36,7 +37,18 @@ impl Weapon for Pistol {
         self.current_amo -= 1;
     }
 
-    fn create_projectile(&self, direction_to_set: (f32, f32), initial_position_to_set: (f32, f32), is_ennemy: bool) -> Projectile {
-        Projectile::new(self.speed, direction_to_set, initial_position_to_set, self.limit_of_fire, is_ennemy)
+    fn create_projectile(
+        &self,
+        direction_to_set: (f32, f32),
+        initial_position_to_set: (f32, f32),
+        is_ennemy: bool,
+    ) -> Projectile {
+        Projectile::new(
+            self.speed,
+            direction_to_set,
+            initial_position_to_set,
+            self.limit_of_fire,
+            is_ennemy,
+        )
     }
 }

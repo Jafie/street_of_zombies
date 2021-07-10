@@ -5,33 +5,6 @@
 
 First Rust project and experience with the [Bevy](https://github.com/bevyengine/bevy) engine. It is a simple Gun-And-Run game in development.
 
-## Installation
-
-### OS Dependencies
-- Windows: Be sure that VS2019 build tools are installed.
-
-- Linux: [(Bevy engine dependencies)](https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md)
-
-
-### Build
-Rust should be installed on your computer.
-Then, a simple "cargo run" on the directoy root should work:
-
-```sh
-# Switch to the correct version (latest release, default is main development branch)
-git checkout latest
-# Builds an run the game on local
-cargo make run
-```
-
-You can also build a Web Assembly version of the game
-```sh
-# Switch to the correct version (latest release, default is main development branch)
-git checkout latest
-# Builds the Web Assembly version
-cargo make --profile release build-web
-```
-
 ## How to play
 
 [ Espace ] ==> Fire.
@@ -40,9 +13,45 @@ cargo make --profile release build-web
 
 ## Want to try ?
 
-[You can try the game on a webpage!](https://jafie.github.io/street_of_zombies/)
+[You can try the game on this webpage!](https://jafie.github.io/street_of_zombies/)
 
-## Next steps - TODO
+## Installation and requirements
+
+### OS Dependencies
+- Windows: Be sure that VS2019 build tools are installed.
+
+- Linux: [(Bevy engine dependencies)](https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md)
+
+### Pre-requirements
+"Street of zombies" needs a new target for "wasm support" and the "cargo-make" tools
+```sh
+rustup target add wasm32-unknown-unknown
+cargo install cargo-make
+```
+
+
+## Build
+Rust should be installed on your computer.
+Then, a simple "cargo run" on the directoy root should work:
+
+```sh
+# Builds an run the game on local
+cargo make run --profile native
+```
+
+You can also build a Web Assembly version of the game
+```sh
+# Builds the Web Assembly version
+cargo make --profile build-web
+```
+
+You can test a Web Assembly version in local on 127.0.0.0:4000 with the following command
+```sh
+# Builds the Web Assembly version and host on 127.0.0.0:4000
+cargo make serve --profile build-web
+```
+
+## Next steps - EXTRA
 
 - [x] Weapon system.
 - [x] Projectile system with interface.
