@@ -24,6 +24,9 @@ web = [
   "bevy_webgl2"
 ]
 
+testing = [
+]
+
 [dependencies]
 rand = "0.8"
 getrandom = { version = "0.2", features = ["wasm-bindgen"] }
