@@ -38,6 +38,10 @@ cargo make --profile release build-web
 
 [ Arrows on keyboard ] ==> Movements
 
+## Want to try ?
+
+[You can try the game on a webpage!](https://jafie.github.io/street_of_zombies/)
+
 ## Next steps - TODO
 
 - [x] Weapon system.
