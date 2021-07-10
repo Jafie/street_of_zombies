@@ -5,6 +5,8 @@ use rand::Rng;
 
 use bevy::prelude::*;
 
+static MAXIMUM_NUMBER_OF_ENNEMIES: usize = 40;
+
 /// Game System: AI management for ennemies  and manage the part "Difficulty" of the score system. Managed by as a "Bevy System"
 pub fn ennemy_ai_system(
     mut commands: Commands,
@@ -17,12 +19,17 @@ pub fn ennemy_ai_system(
 ) {
     let current_scoreboard = scoreboard_query.single().unwrap();
     movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
-    ennemy_spawn_system(
-        &mut commands,
-        current_scoreboard.get_difficulty_level(),
-        &asset_server,
-        &mut texture_atlases,
-    );
+
+    let ennemies_spawned = ennemy_query.iter_mut().count();
+
+    if ennemies_spawned < MAXIMUM_NUMBER_OF_ENNEMIES {
+        ennemy_spawn_system(
+            &mut commands,
+            current_scoreboard.get_difficulty_level(),
+            &asset_server,
+            &mut texture_atlases,
+        );
+    }
 }
 
 fn movement_of_ennemies(
@@ -58,6 +65,7 @@ fn movement_of_ennemies(
         ennemy.launch_attack(commands, materials, time)
     }
 }
+
 
 fn ennemy_spawn_system(
     commands: &mut Commands,
