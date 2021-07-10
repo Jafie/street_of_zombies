@@ -1,9 +1,9 @@
-# street_of_zombies
+# Street Of Zombies - A game developped with Rust
 ![CI Tests](https://github.com/Jafie/street_of_zombies/actions/workflows/rust.yml/badge.svg)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Jafie/street_of_zombies/blob/main/LICENSE)
 [![Sprites: CC-0 license](https://img.shields.io/badge/License-CC--0-blue.svg)](https://creativecommons.org/licenses/by-sa/3.0/)
 
-First Rust project and experience with the [Bevy](https://github.com/bevyengine/bevy) engine. It is a simple Gun-And-Run game in development.
+My first project and experience with [Rust](https://www.rust-lang.org/) and the [Bevy](https://github.com/bevyengine/bevy) engine. It is a Gun-And-Run game.
 
 ## How to play
 
