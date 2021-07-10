@@ -13,15 +13,27 @@ use crate::game_system::*;
 static GAME_RESOLUTION_WIDTH: f32 = 1024.0;
 static GAME_RESOLUTION_HEIGHT: f32 = 720.0;
 
+
+#[cfg(target_arch = "wasm32")]
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 fn main() {
-    App::build()
-        .add_plugins(DefaultPlugins)
-        .add_plugin(StreetOfZombiesEngine)
-        .insert_resource(WindowDescriptor {
-            title: "street_of_zombies".to_string(),
-            width: GAME_RESOLUTION_WIDTH,
-            height: GAME_RESOLUTION_HEIGHT,
-            ..Default::default()
-        })
-        .run();
+    let mut app = App::build();
+
+    app.add_plugins(DefaultPlugins);
+
+    // when building for Web, use WebGL2 rendering
+    #[cfg(target_arch = "wasm32")]
+    app.add_plugin(bevy_webgl2::WebGL2Plugin);
+        
+
+    app.add_plugin(StreetOfZombiesEngine)
+    .insert_resource(WindowDescriptor {
+        title: "street_of_zombies".to_string(),
+        width: GAME_RESOLUTION_WIDTH,
+        height: GAME_RESOLUTION_HEIGHT,
+        ..Default::default()
+    })
+    .run();
 }

@@ -20,8 +20,16 @@ Then, a simple "cargo run" on the directoy root should work:
 ```sh
 # Switch to the correct version (latest release, default is main development branch)
 git checkout latest
-# Builds an run the game
-cargo run
+# Builds an run the game on local
+cargo make run
+```
+
+You can also build a Web Assembly version of the game
+```sh
+# Switch to the correct version (latest release, default is main development branch)
+git checkout latest
+# Builds the Web Assembly version
+cargo make --profile release build-web
 ```
 
 ## How to play
