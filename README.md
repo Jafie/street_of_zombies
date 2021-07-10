@@ -32,7 +32,7 @@ cargo install cargo-make
 
 ## Build
 Rust should be installed on your computer.
-Then, a simple "cargo run" on the directoy root should work:
+Then, the following command on the root directory will build and launch the game on your computer.
 
 ```sh
 # Builds an run the game on local
