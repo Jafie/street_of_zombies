@@ -23,7 +23,7 @@ jobs:
     - name: Build - Native
       run: cargo make --profile release build-native --verbose
   
-      - name: Build - Web
+    - name: Build - Web
       run: cargo make --profile release build-web --verbose
 
     - name: Run tests
