@@ -11,20 +11,18 @@ opt-level = 's'
 [features]
 default = [
   "bevy/bevy_gltf",
-  "bevy/bevy_winit",
   "bevy/render",
   "bevy/png",
 ]
 
 native = [
   "bevy/bevy_wgpu",
+  "bevy/bevy_winit",
 ]
 
 web = [
-  "bevy_webgl2"
-]
-
-testing = [
+  "bevy_webgl2",
+  "bevy/bevy_winit",
 ]
 
 [dependencies]
