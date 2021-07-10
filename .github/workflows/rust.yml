@@ -20,6 +20,9 @@ jobs:
     - name: Install alsa and udev
       run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
   
+    - name: Prepare Cargo
+      run: rustup target add wasm32-unknown-unknown; cargo install cargo-make;
+  
     - name: Build - Native
       run: cargo make --profile release build-native --verbose
   
