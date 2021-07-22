@@ -1,9 +1,13 @@
 use crate::game_entity::*;
 use bevy::prelude::*;
 
+/// Path to the "ZOMBIE" sprite
 static ZOMBIE_ASSET_PATH: &'static str = "sprites/zombie.png";
+/// Path to the "PLAYER" sprite
 static PLAYER_ASSET_PATH: &'static str = "sprites/woman.png";
 
+/// Current direction of the entity (targeting up, left, right or down)
+#[derive(PartialEq, Debug)]
 enum TexturePositionEnum {
     DOWN,
     LEFT,
@@ -11,8 +15,11 @@ enum TexturePositionEnum {
     UP,
 }
 
+/// Number of columns per sprite templates
 static COLS_PER_SPRITES: usize = 8;
 
+/// This is a function called by "Bevy" system.
+/// This function will animate each ennemy and player sprites.
 pub fn animate_sprite_system(
     time: Res<Time>,
     mut query_set: QuerySet<(
@@ -39,6 +46,9 @@ pub fn animate_sprite_system(
     }
 }
 
+/// Animate a "Moveable Sprite"
+///
+/// The animated sprite will change if the "Moveable Sprite" moved since last function call.
 fn animate_sprite(
     entity: &mut MoveableSprite,
     time: &Res<Time>,
@@ -61,6 +71,18 @@ fn animate_sprite(
     }
 }
 
+/// This function converts the direction of the "MoveableSprite" to a TexturePositionEnum (UP, DOWN, LEFT, RIGHT)
+///
+/// The animated sprite will change if the "Moveable Sprite" moved since last function call.
+/// # Arguments
+///
+/// * `coeff_factor` - The direction factor as a tuple (x, y)
+/// # Examples
+///
+/// ```
+///     let generated_direction = generate_texture_position_from_coeff_factor((0.0, 1.0));
+///     assert_eq!(generated_direction, TexturePositionEnum::UP);
+/// ```
 fn generate_texture_position_from_coeff_factor(coeff_factor: (f32, f32)) -> TexturePositionEnum {
     let texture_direction: TexturePositionEnum;
     let (coeff_factor_x, coeff_factor_y) = coeff_factor;
@@ -87,11 +109,13 @@ fn generate_texture_position_from_coeff_factor(coeff_factor: (f32, f32)) -> Text
     texture_direction
 }
 
+/// Enumerator about the different textures available
 pub enum TextureToGenerate {
     PLAYER,
     ZOMBIE,
 }
 
+/// Generate a texture thanks to a "TextureToGenerate"
 pub fn generate_texture(
     asset_server: &Res<AssetServer>,
     texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
@@ -108,4 +132,45 @@ pub fn generate_texture(
     let generated_texture = TextureAtlas::from_grid(texture_handle, Vec2::new(80.0, 80.0), 8, 4);
 
     texture_atlases.add(generated_texture)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn coeff_factor_to_texture_up() {
+        let generated_direction = generate_texture_position_from_coeff_factor((0.0, 1.0));
+        assert_eq!(generated_direction, TexturePositionEnum::UP);
+    }
+
+    #[test]
+    fn coeff_factor_to_texture_down() {
+        let generated_direction = generate_texture_position_from_coeff_factor((0.0, -1.0));
+        assert_eq!(generated_direction, TexturePositionEnum::DOWN);
+    }
+
+    #[test]
+    fn coeff_factor_to_texture_left() {
+        let generated_direction = generate_texture_position_from_coeff_factor((-1.0, 0.0));
+        assert_eq!(generated_direction, TexturePositionEnum::LEFT);
+    }
+
+    #[test]
+    fn coeff_factor_to_texture_right() {
+        let generated_direction = generate_texture_position_from_coeff_factor((1.0, 0.0));
+        assert_eq!(generated_direction, TexturePositionEnum::RIGHT);
+    }
+
+    #[test]
+    fn coeff_factor_to_texture_priority_up() {
+        let generated_direction = generate_texture_position_from_coeff_factor((1.0, 1.0));
+        assert_eq!(generated_direction, TexturePositionEnum::UP);
+    }
+
+    #[test]
+    fn coeff_factor_to_texture_priority_down() {
+        let generated_direction = generate_texture_position_from_coeff_factor((1.0, -1.0));
+        assert_eq!(generated_direction, TexturePositionEnum::DOWN);
+    }
 }

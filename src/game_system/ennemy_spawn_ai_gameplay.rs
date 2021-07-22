@@ -66,7 +66,6 @@ fn movement_of_ennemies(
     }
 }
 
-
 fn ennemy_spawn_system(
     commands: &mut Commands,
     difficulty_level: u32,
