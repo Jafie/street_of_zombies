@@ -42,7 +42,7 @@ cargo make run --profile native
 You can also build a Web Assembly version of the game
 ```sh
 # Builds the Web Assembly version
-cargo make --profile build-web
+cargo make --profile release build-web
 ```
 
 You can test a Web Assembly version in local on 127.0.0.0:4000 with the following command
