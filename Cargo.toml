@@ -6,7 +6,7 @@ edition = "2018"
 
 [profile.release]
 lto = "thin"
-opt-level = 'z'
+opt-level = 's'
 
 [features]
 default = [
