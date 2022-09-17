@@ -11,10 +11,6 @@ use crate::game_system::*;
 static GAME_RESOLUTION_WIDTH: f32 = 1024.0;
 static GAME_RESOLUTION_HEIGHT: f32 = 720.0;
 
-#[cfg(target_arch = "wasm32")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 fn main() {
     let mut app = App::build();
 
