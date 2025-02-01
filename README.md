@@ -5,6 +5,8 @@
 
 My first project and experience with [Rust](https://www.rust-lang.org/) and the [Bevy](https://github.com/bevyengine/bevy) engine. It is a Gun-And-Run game.
 
+Unfortunately, some issues appeared when running the project locally, due to a long time without maintainance. The project is under migration to a modern version of Bevy and Rust in a new branch (Not active yet)
+
 ## How to play
 
 [ Espace ] ==> Fire.
