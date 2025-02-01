@@ -2,7 +2,8 @@
 name = "street_of_zombies"
 version = "0.1.0"
 authors = ["Jafie <fortun.axel@gmail.com>"]
-edition = "2018"
+edition = "2021"
+resolver = "2"
 
 [profile.release]
 lto = "thin"
@@ -11,17 +12,14 @@ opt-level = 's'
 [features]
 default = [
   "bevy/bevy_gltf",
-  "bevy/render",
   "bevy/png",
 ]
 
 native = [
-  "bevy/bevy_wgpu",
   "bevy/bevy_winit",
 ]
 
 web = [
-  "bevy_webgl2",
   "bevy/bevy_winit",
 ]
 
@@ -29,5 +27,4 @@ web = [
 rand = "0.8"
 getrandom = { version = "0.2", features = ["wasm-bindgen"] }
 instant  = "0.1.9"
-bevy = {version="0.5.0", default-features=false}
-bevy_webgl2 = {version="0.5.2", optional=true}
+bevy = "0.15.0"

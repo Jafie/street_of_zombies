@@ -16,6 +16,7 @@ struct ScoreAndInfoInternal {
     start_time: Instant,
 }
 
+#[derive(Component)]
 pub struct ScoreAndInfo {
     score_data: ScoreAndInfoInternal,
 }

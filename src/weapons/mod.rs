@@ -45,7 +45,7 @@ pub trait Weapon {
         initial_pos: (f32, f32),
         is_ennemy: bool,
     ) {
-        if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_seconds()) {
+        if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_secs()) {
             self.fire_with_weapon(commands, materials, direction, initial_pos, is_ennemy);
             self.reduce_amo();
         }

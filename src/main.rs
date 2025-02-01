@@ -4,28 +4,28 @@ mod sprite_manager_system;
 mod weapons;
 
 use bevy::prelude::*;
-
+use bevy::window::WindowPlugin;
+use bevy::window::WindowResolution;
 use crate::game_system::*;
 
 // Resolution
-static GAME_RESOLUTION_WIDTH: f32 = 1024.0;
-static GAME_RESOLUTION_HEIGHT: f32 = 720.0;
+static GAME_RESOLUTION_WIDTH: u32 = 1024;
+static GAME_RESOLUTION_HEIGHT: u32 = 720;
 
 fn main() {
-    let mut app = App::build();
+    let mut app = App::new();
 
     app.add_plugins(DefaultPlugins);
 
-    // when building for Web, use WebGL2 rendering
-    #[cfg(target_arch = "wasm32")]
-    app.add_plugin(bevy_webgl2::WebGL2Plugin);
-
-    app.add_plugin(StreetOfZombiesEngine)
-        .insert_resource(WindowDescriptor {
+    app.add_plugins(DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
             title: "street_of_zombies".to_string(),
-            width: GAME_RESOLUTION_WIDTH,
-            height: GAME_RESOLUTION_HEIGHT,
+            resolution: WindowResolution {
+                ..Default::default()
+            },
             ..Default::default()
-        })
-        .run();
+        }),
+        close_when_requested: true,
+        ..Default::default()
+      })).run();
 }

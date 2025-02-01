@@ -25,6 +25,7 @@ struct EnnemyInternalData {
 }
 
 /// An ennemy entity - An Ennemy object contains all the data necessary for a single ennemy
+#[derive(Component)]
 pub struct Ennemy {
     sprite_data: MoveableSprite,
     internal_data: EnnemyInternalData,
@@ -136,7 +137,7 @@ impl Ennemy {
             true,
         );
 
-        self.internal_data.tick_elapsed += time.delta_seconds();
+        self.internal_data.tick_elapsed += time.delta_secs();
 
         if self.internal_data.tick_elapsed > self.internal_data.cooldown_tick {
             self.internal_data.current_weapon.reload();

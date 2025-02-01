@@ -118,9 +118,9 @@ pub enum TextureToGenerate {
 /// Generate a texture thanks to a "TextureToGenerate"
 pub fn generate_texture(
     asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    texture_atlases: &mut ResMut<Assets<TextureAtlasLayout>>,
     texture_type: TextureToGenerate,
-) -> Handle<TextureAtlas> {
+) -> Handle<TextureAtlasLayout> {
     let texture_path: &str;
 
     match texture_type {
@@ -129,7 +129,7 @@ pub fn generate_texture(
     }
 
     let texture_handle = asset_server.load(texture_path);
-    let generated_texture = TextureAtlas::from_grid(texture_handle, Vec2::new(80.0, 80.0), 8, 4);
+    let generated_texture = TextureAtlasLayout::from_grid(texture_handle, Vec2::new(80.0, 80.0), 8, 4);
 
     texture_atlases.add(generated_texture)
 }

@@ -15,9 +15,9 @@ pub fn ennemy_ai_system(
     mut ennemy_query: Query<(&mut ennemies::Ennemy, &mut Transform)>,
     scoreboard_query: Query<&scoreboard::ScoreAndInfo>,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let current_scoreboard = scoreboard_query.single().unwrap();
+    let current_scoreboard = scoreboard_query.single();
     movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
 
     let ennemies_spawned = ennemy_query.iter_mut().count();
@@ -70,7 +70,7 @@ fn ennemy_spawn_system(
     commands: &mut Commands,
     difficulty_level: u32,
     asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    texture_atlases: &mut ResMut<Assets<TextureAtlasLayout>>,
 ) {
     static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 1100;
     let generated_spawn_factor = SPAWN_FACTOR_CLASSIC_ENNEMY - (200 * difficulty_level);
@@ -86,7 +86,7 @@ fn ennemy_spawn_system(
 fn generate_new_ennemy(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    texture_atlases: &mut ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // Random generation
     let ennemy_initial_position: (f32, f32) =
@@ -98,7 +98,7 @@ fn generate_new_ennemy(
 
     // Ennemy
     commands
-        .spawn_bundle(SpriteSheetBundle {
+        .spawn(SpriteSheetBundle {
             texture_atlas: generate_texture(
                 asset_server,
                 texture_atlases,

@@ -25,7 +25,7 @@ static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
 pub struct StreetOfZombiesEngine;
 
 impl Plugin for StreetOfZombiesEngine {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.add_startup_system(setup.system())
             .add_startup_system(set_window_parameters.system())
             .add_system(keyboard_capture.system())
@@ -43,7 +43,7 @@ impl Plugin for StreetOfZombiesEngine {
 pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // cameras
