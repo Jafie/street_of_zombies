@@ -1,10 +1,17 @@
 use crate::game_entity::*;
 use bevy::prelude::*;
+use bevy::sprite::TextureAtlas;
+use bevy::sprite::TextureAtlasSprite;
+use bevy::time::Timer;
 
 /// Path to the "ZOMBIE" sprite
 static ZOMBIE_ASSET_PATH: &'static str = "sprites/zombie.png";
 /// Path to the "PLAYER" sprite
 static PLAYER_ASSET_PATH: &'static str = "sprites/woman.png";
+
+/// Custom component that wraps Timer for sprite animation
+#[derive(Component)]
+pub struct AnimationTimer(pub Timer);
 
 /// Current direction of the entity (targeting up, left, right or down)
 #[derive(PartialEq, Debug)]
@@ -22,27 +29,29 @@ static COLS_PER_SPRITES: usize = 8;
 /// This function will animate each ennemy and player sprites.
 pub fn animate_sprite_system(
     time: Res<Time>,
-    mut query_set: QuerySet<(
-        Query<(&mut ennemies::Ennemy, &mut Timer, &mut TextureAtlasSprite)>,
-        Query<(&mut player::Player, &mut Timer, &mut TextureAtlasSprite)>,
+    mut query: Query<(
+        Option<&mut ennemies::Ennemy>,
+        Option<&mut player::Player>,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
     )>,
 ) {
-    for (mut ennemy, mut timer, mut sprite) in query_set.q0_mut().iter_mut() {
-        animate_sprite(
-            &mut ennemy.get_moveable_interface_mut(),
-            &time,
-            &mut timer,
-            &mut sprite,
-        );
-    }
-
-    if let Ok((mut player, mut timer, mut sprite)) = query_set.q1_mut().single_mut() {
-        animate_sprite(
-            &mut player.get_moveable_interface_mut(),
-            &time,
-            &mut timer,
-            &mut sprite,
-        );
+    for (enemy, player, mut timer, mut sprite) in query.iter_mut() {
+        if let Some(mut enemy) = enemy {
+            animate_sprite(
+                &mut enemy.get_moveable_interface_mut(),
+                &time,
+                &mut timer.0,
+                &mut sprite,
+            );
+        } else if let Some(mut player) = player {
+            animate_sprite(
+                &mut player.get_moveable_interface_mut(),
+                &time,
+                &mut timer.0,
+                &mut sprite,
+            );
+        }
     }
 }
 
@@ -66,7 +75,7 @@ fn animate_sprite(
             TexturePositionEnum::UP => coef_val = 3 * COLS_PER_SPRITES,
         }
 
-        let calculated_index = (((sprite.index as usize + 1) % COLS_PER_SPRITES) + coef_val) as u32;
+        let calculated_index = ((sprite.index + 1) % COLS_PER_SPRITES) + coef_val;
         sprite.index = calculated_index;
     }
 }
@@ -129,7 +138,14 @@ pub fn generate_texture(
     }
 
     let texture_handle = asset_server.load(texture_path);
-    let generated_texture = TextureAtlas::from_grid(texture_handle, Vec2::new(80.0, 80.0), 8, 4);
+    let generated_texture = TextureAtlas::from_grid(
+        texture_handle, 
+        Vec2::new(80.0, 80.0), 
+        8, 
+        4,
+        None,
+        None
+    );
 
     texture_atlases.add(generated_texture)
 }

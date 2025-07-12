@@ -38,19 +38,7 @@ Then, the following command on the root directory will build and launch the game
 
 ```sh
 # Builds an run the game on local
-cargo make run --profile native
-```
-
-You can also build a Web Assembly version of the game
-```sh
-# Builds the Web Assembly version
-cargo make --profile release build-web
-```
-
-You can test a Web Assembly version in local on 127.0.0.0:4000 with the following command
-```sh
-# Builds the Web Assembly version and host on 127.0.0.0:4000
-cargo make serve --profile build-web
+cargo run
 ```
 
 ## Next steps - EXTRA
@@ -66,6 +54,8 @@ cargo make serve --profile build-web
 - [x] Map limit.
 - [ ] Bonus (Change weapons and Projectile types).
 - [x] Scoreboard + Player health.
+- [ ] Complete web version for Bevy 0.12
+- [ ] Fix latest position bugs
 
 ## Screenshots and Gameplay
 

@@ -33,21 +33,19 @@ pub fn projectile_movement_system(
 /// Game System: The collision system with projectiles and manage the part "health + Score" of the score system. Managed by as a "Bevy System"
 pub fn projectile_collision_and_score_system(
     mut commands: Commands,
-    mut query_set: QuerySet<(
-        Query<(&mut ennemies::Ennemy, Entity)>,
-        Query<(&mut player::Player, Entity)>,
-    )>,
+    mut enemy_query: Query<(&mut ennemies::Ennemy, Entity)>,
+    mut player_query: Query<(&mut player::Player, Entity)>,
     projectile_query: Query<(Entity, &projectiles::Projectile)>,
     mut scoreboard_query: Query<(&mut scoreboard::ScoreAndInfo, &mut Text, &mut Style)>,
 ) {
-    let (mut score_struct, mut score_text, mut style_text) = scoreboard_query.single_mut().unwrap();
+    if let Ok((mut score_struct, mut score_text, mut style_text)) = scoreboard_query.get_single_mut() {
 
     // check collision with objects
     for (collider_entity, projectile) in projectile_query.iter() {
         if projectile.is_coming_from_ennemy() {
             check_collision_with_player(
                 &mut commands,
-                &mut query_set.q1_mut(),
+                &mut player_query,
                 projectile,
                 &collider_entity,
                 &mut score_struct,
@@ -55,7 +53,7 @@ pub fn projectile_collision_and_score_system(
         } else {
             check_collision_with_ennemy(
                 &mut commands,
-                &mut query_set.q0_mut(),
+                &mut enemy_query,
                 projectile,
                 &collider_entity,
                 &mut score_struct,
@@ -63,8 +61,9 @@ pub fn projectile_collision_and_score_system(
         }
     }
 
-    score_struct.update_percent_until_next_level();
-    score_struct.update_scoarboard_text(&mut score_text, &mut style_text);
+        score_struct.update_percent_until_next_level();
+        score_struct.update_scoarboard_text(&mut score_text, &mut style_text);
+    }
 }
 
 fn check_collision_with_ennemy(

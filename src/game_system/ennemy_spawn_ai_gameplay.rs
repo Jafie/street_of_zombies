@@ -17,24 +17,25 @@ pub fn ennemy_ai_system(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let current_scoreboard = scoreboard_query.single().unwrap();
-    movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
+    if let Ok(current_scoreboard) = scoreboard_query.get_single() {
+        movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
 
-    let ennemies_spawned = ennemy_query.iter_mut().count();
+        let ennemies_spawned = ennemy_query.iter_mut().count();
 
-    if ennemies_spawned < MAXIMUM_NUMBER_OF_ENNEMIES {
-        ennemy_spawn_system(
-            &mut commands,
-            current_scoreboard.get_difficulty_level(),
-            &asset_server,
-            &mut texture_atlases,
-        );
+        if ennemies_spawned < MAXIMUM_NUMBER_OF_ENNEMIES {
+            ennemy_spawn_system(
+                &mut commands,
+                current_scoreboard.get_difficulty_level(),
+                &asset_server,
+                &mut texture_atlases,
+            );
+        }
     }
 }
 
 fn movement_of_ennemies(
     commands: &mut Commands,
-    materials: &mut ResMut<Assets<ColorMaterial>>,
+    _materials: &mut ResMut<Assets<ColorMaterial>>,
     time: &Res<Time>,
     ennemy_query: &mut Query<(&mut ennemies::Ennemy, &mut Transform)>,
 ) {
@@ -62,7 +63,7 @@ fn movement_of_ennemies(
         }
 
         // Attack
-        ennemy.launch_attack(commands, materials, time)
+        ennemy.launch_attack(commands, time)
     }
 }
 
@@ -98,7 +99,7 @@ fn generate_new_ennemy(
 
     // Ennemy
     commands
-        .spawn_bundle(SpriteSheetBundle {
+        .spawn(SpriteSheetBundle {
             texture_atlas: generate_texture(
                 asset_server,
                 texture_atlases,
@@ -119,5 +120,5 @@ fn generate_new_ennemy(
             ennemy_fire_direction,
             50,
         ))
-        .insert(Timer::from_seconds(0.1, true));
+        .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
 }

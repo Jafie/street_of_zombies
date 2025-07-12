@@ -28,25 +28,25 @@ pub trait Weapon {
         Self: Sized;
 
     /// The generic fire command. Will generate a projectile following the weapon type defined
-    ///
+    /// 
     /// # Arguments
     ///
     /// * `command` - The bevy command interface.
-    /// * `materials` - The bevy material interface.
+    /// * `time` - The bevy time interface.
     /// * `direction` - The direction to fire the projectile.
     /// * `initial_pos` - The initial position of the projectile.
+    /// * `is_ennemy` - True if the projectile is from an ennemy.
     ///
     fn fire_global(
         &mut self,
         commands: &mut Commands,
-        materials: &mut ResMut<Assets<ColorMaterial>>,
         time: &Res<Time>,
         direction: (f32, f32),
         initial_pos: (f32, f32),
         is_ennemy: bool,
     ) {
         if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_seconds()) {
-            self.fire_with_weapon(commands, materials, direction, initial_pos, is_ennemy);
+            self.fire_with_weapon(commands, direction, initial_pos, is_ennemy);
             self.reduce_amo();
         }
     }
@@ -54,24 +54,25 @@ pub trait Weapon {
     fn fire_with_weapon(
         &mut self,
         commands: &mut Commands,
-        materials: &mut ResMut<Assets<ColorMaterial>>,
         direction: (f32, f32),
         initial_pos: (f32, f32),
         is_ennemy: bool,
     ) {
         let (pos_x, pox_y) = initial_pos;
-        let asset_color;
-        if is_ennemy {
-            asset_color = Color::rgb(1.0, 0.0, 0.0).into();
+        let asset_color = if is_ennemy {
+            Color::rgb(1.0, 0.0, 0.0)
         } else {
-            asset_color = Color::rgb(0.0, 0.0, 1.0).into();
-        }
+            Color::rgb(0.0, 0.0, 1.0)
+        };
 
         commands
-            .spawn_bundle(SpriteBundle {
-                material: materials.add(asset_color),
+            .spawn(SpriteBundle {
+                sprite: Sprite {
+                    color: asset_color,
+                    custom_size: Some(Vec2::new(5.0, 5.0)),
+                    ..Default::default()
+                },
                 transform: Transform::from_xyz(pos_x, pox_y, 0.0),
-                sprite: Sprite::new(Vec2::new(5.0, 5.0)),
                 ..Default::default()
             })
             .insert(self.create_projectile(direction, initial_pos, is_ennemy));
@@ -90,11 +91,12 @@ pub trait Weapon {
     fn is_ready_to_fire(&mut self, time_elapsed_since_last_update: f32) -> bool;
 
     /// Create a new projectile
-    ///
+    /// 
     /// # Arguments
     ///
     /// * `direction_to_set` - The direction of the projectile
     /// * `initial_position_to_set` - The initial position of the projectile
+    /// * `is_ennemy` - True if the projectile is from an ennemy.
     ///
     fn create_projectile(
         &self,

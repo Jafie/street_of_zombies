@@ -5,6 +5,7 @@ use crate::weapons::Pistol;
 use crate::weapons::Weapon;
 
 use bevy::prelude::*;
+use bevy::ecs::component::Component;
 
 // Default pistol weapon data
 static PROJECTILE_SPEED: f32 = 300.0;
@@ -25,6 +26,7 @@ struct EnnemyInternalData {
 }
 
 /// An ennemy entity - An Ennemy object contains all the data necessary for a single ennemy
+#[derive(Component)]
 pub struct Ennemy {
     sprite_data: MoveableSprite,
     internal_data: EnnemyInternalData,
@@ -117,23 +119,21 @@ impl Ennemy {
     /// # Arguments
     ///
     /// * `commands` - The bevy command
-    /// * `materials` - The bevy material
     /// * `time` - The timer (used for reloading)
     /// * `points` - The number of points valued by the ennemy
     /// ```
     pub fn launch_attack(
         &mut self,
         commands: &mut Commands,
-        materials: &mut ResMut<Assets<ColorMaterial>>,
         time: &Res<Time>,
     ) {
         self.internal_data.current_weapon.fire_global(
             commands,
-            materials,
-            &time,
-            self.internal_data.fire_direction,
+            time,
+            self.sprite_data.get_direction(),
             self.sprite_data.get_position(),
             true,
+            // Add a dummy argument if required by the trait
         );
 
         self.internal_data.tick_elapsed += time.delta_seconds();

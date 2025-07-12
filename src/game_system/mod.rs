@@ -25,17 +25,15 @@ static INITIAL_PLAYER_DIRECTION: (f32, f32) = (0.0, 1.0);
 pub struct StreetOfZombiesEngine;
 
 impl Plugin for StreetOfZombiesEngine {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(setup.system())
-            .add_startup_system(set_window_parameters.system())
-            .add_system(keyboard_capture.system())
-            .add_system(projectile_and_kill_gameplay::projectile_movement_system.system())
-            .add_system(
-                projectile_and_kill_gameplay::projectile_collision_and_score_system.system(),
-            )
-            .add_system(ennemy_spawn_ai_gameplay::ennemy_ai_system.system())
-            .add_system(animate_sprite_system.system())
-            .run();
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, (setup, set_window_parameters))
+            .add_systems(Update, (
+                keyboard_capture,
+                projectile_and_kill_gameplay::projectile_movement_system,
+                projectile_and_kill_gameplay::projectile_collision_and_score_system,
+                ennemy_spawn_ai_gameplay::ennemy_ai_system,
+            ))
+            .add_systems(Update, animate_sprite_system.after(keyboard_capture));
     }
 }
 
@@ -44,24 +42,22 @@ pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // cameras
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-    commands.spawn_bundle(UiCameraBundle::default());
+    commands.spawn(Camera2dBundle::default());
 
     // Background image
-    let background_image: Handle<Texture> =
+    let background_image: Handle<Image> =
         asset_server.load("images/background_street_of_zombies.png");
-    commands.spawn_bundle(SpriteBundle {
-        material: materials.add(background_image.into()),
+    commands.spawn(SpriteBundle {
+        texture: background_image,
         ..Default::default()
     });
 
     // Hidden ennemy (quick texture load)
     // This is a "pre-load" of the zombie texture.
     // Avoid to show a "Zombies" with a player Sprite for few milliseconds.
-    commands.spawn_bundle(SpriteSheetBundle {
+    commands.spawn(SpriteSheetBundle {
         texture_atlas: generate_texture(
             &asset_server,
             &mut texture_atlases,
@@ -69,16 +65,13 @@ pub fn setup(
         ),
         transform: Transform::from_xyz(GAME_AREA_LIMIT_X + 50., GAME_AREA_LIMIT_Y + 50., 0.0),
         sprite: TextureAtlasSprite::new(1),
-        visible: Visible {
-            is_transparent: true,
-            is_visible: false,
-        },
+        visibility: Visibility::Hidden,
         ..Default::default()
     });
 
     // Main character
     commands
-        .spawn_bundle(SpriteSheetBundle {
+        .spawn(SpriteSheetBundle {
             texture_atlas: generate_texture(
                 &asset_server,
                 &mut texture_atlases,
@@ -97,69 +90,59 @@ pub fn setup(
             INITIAL_PLAYER_DIRECTION,
             (INITIAL_PLAYER_POSITION_X, INITIAL_PLAYER_POSITION_Y),
         ))
-        .insert(Timer::from_seconds(0.1, true));
+        .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
 
     // Scoreboard
     commands
-        .spawn_bundle(TextBundle {
-            text: Text {
-                sections: vec![
-                    TextSection {
-                        value: "Score".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.5, 0.5, 1.0),
-                        },
-                    },
-                    TextSection {
-                        value: "health".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.5, 1.0, 0.5),
-                        },
-                    },
-                    TextSection {
-                        value: "Difficulty".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(1.0, 1.0, 1.0),
-                        },
-                    },
-                ],
-                ..Default::default()
-            },
-            style: Style {
-                position_type: PositionType::Absolute,
-                position: Rect {
-                    top: Val::Px(0.),
-                    left: Val::Px(0.),
-                    ..Default::default()
+        .spawn(TextBundle::from_sections([
+            TextSection::new(
+                "Score",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgb(0.5, 0.5, 1.0),
                 },
-                ..Default::default()
-            },
+            ),
+            TextSection::new(
+                "health",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgb(0.5, 1.0, 0.5),
+                },
+            ),
+            TextSection::new(
+                "Difficulty",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 40.0,
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                },
+            ),
+        ])
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(0.0),
+            left: Val::Px(0.0),
             ..Default::default()
-        })
+        }))
         .insert(scoreboard::ScoreAndInfo::new());
 }
 
 /// Capture the keyboard entry to move or fire with the player entity. Managed by as a "Bevy System"
 pub fn keyboard_capture(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&mut player::Player, &mut Transform)>,
 ) {
-    if let Ok((mut player, mut transform)) = query.single_mut() {
+    if let Ok((mut player, mut transform)) = query.get_single_mut() {
         let mut direction: (f32, f32) = (0.0, 0.0);
         let mut number_of_valid_pressure: u8 = 0;
 
         // Fire capture
         if keyboard_input.pressed(KeyCode::Space) {
-            player.fire(&mut commands, &mut materials, &time);
+            player.fire(&mut commands, &time);
         } else {
             player.reload_weapon();
         }
@@ -220,10 +203,11 @@ pub fn is_next_movement_out_of_game_area(
 }
 
 /// This "Startup-Item" modify the Window parameter (title and no-resize)
-fn set_window_parameters(mut windows: ResMut<Windows>) {
-    let window = windows.get_primary_mut().unwrap();
-    window.set_title(String::from("Street of Zombies"));
-    window.set_resizable(false);
+fn set_window_parameters(mut windows: Query<&mut Window>) {
+    if let Ok(mut window) = windows.get_single_mut() {
+        window.title = "Street of Zombies".to_string();
+        window.resizable = false;
+    }
 }
 
 #[cfg(test)]

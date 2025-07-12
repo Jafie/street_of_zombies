@@ -3,6 +3,8 @@ use crate::game_entity::MoveableSpriteTrait;
 
 use crate::game_system::math_and_generator;
 
+use bevy::ecs::component::Component;
+
 static DEFAULT_PROJECTILE_HITBOX: (f32, f32) = (10., 10.);
 
 struct ProjectileInternalData {
@@ -10,6 +12,7 @@ struct ProjectileInternalData {
     is_from_ennemy: bool,
 }
 
+#[derive(Component)]
 pub struct Projectile {
     sprite_data: MoveableSprite,
     internal_data: ProjectileInternalData,

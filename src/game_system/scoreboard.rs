@@ -1,6 +1,7 @@
 use instant::*;
 
 use bevy::prelude::*;
+use bevy::ecs::component::Component;
 
 use crate::{GAME_RESOLUTION_HEIGHT, GAME_RESOLUTION_WIDTH};
 
@@ -16,6 +17,7 @@ struct ScoreAndInfoInternal {
     start_time: Instant,
 }
 
+#[derive(Component)]
 pub struct ScoreAndInfo {
     score_data: ScoreAndInfoInternal,
 }
@@ -129,8 +131,8 @@ impl ScoreAndInfo {
     }
 
     fn print_board_game_over(&self, text: &mut Text, style: &mut Style) {
-        style.position.top = Val::Px(GAME_RESOLUTION_HEIGHT / 2.);
-        style.position.left = Val::Px(GAME_RESOLUTION_WIDTH / 4.);
+        style.top = Val::Px(GAME_RESOLUTION_HEIGHT / 2.);
+        style.left = Val::Px(GAME_RESOLUTION_WIDTH / 4.);
         text.sections[0].value = format!("- GAME OVER -    ");
         text.sections[1].value = format!("Score =  {:10}", self.get_score());
         text.sections[2].value = format!("    - GAME OVER -");
