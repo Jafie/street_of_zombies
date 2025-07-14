@@ -171,7 +171,7 @@ mod tests {
 
     #[test]
     fn get_position_from_moveable_sprite() {
-        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
         let (ennemy_position, _) = get_position_and_hitboxes(ennemy.get_moveable_interface());
 
         assert_eq!(ennemy_position, Vec3::new(15., 20., 0.));
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn get_hitbox_from_moveable_sprite() {
-        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
         let (_, ennemy_hitbox) = get_position_and_hitboxes(ennemy.get_moveable_interface());
         let ennemy_hibox = ennemy.get_moveable_interface().get_hitbox_size();
 
@@ -200,7 +200,7 @@ mod tests {
 
     #[test]
     fn two_moveable_sprite_not_collides() {
-        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
         let projectile = projectiles::Projectile::new(500.0, (5., 10.), (150., 2000.), 500, false);
 
         assert_eq!(

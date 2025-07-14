@@ -94,8 +94,6 @@ fn generate_new_ennemy(
         math_and_generator::generate_random_position(GAME_AREA_LIMIT_X, GAME_AREA_LIMIT_Y);
     let ennemy_initial_direction: (f32, f32) =
         math_and_generator::generate_random_direction_factor();
-    let ennemy_fire_direction: (f32, f32) =
-        math_and_generator::generate_random_direction_factor_strict();
 
     // Ennemy
     commands
@@ -117,7 +115,6 @@ fn generate_new_ennemy(
             INITIAL_ENNEMY_SPEED,
             ennemy_initial_direction,
             ennemy_initial_position,
-            ennemy_fire_direction,
             50,
         ))
         .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));

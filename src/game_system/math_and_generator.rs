@@ -43,33 +43,6 @@ pub fn generate_random_direction_factor() -> (f32, f32) {
     (random_direction_factor_x, random_direction_factor_y)
 }
 
-/// Generate a random direction factor in a tuple (x, y). The direction factor is "strict" (with x.abs() + y.abs() = 1)
-///
-/// # Examples
-///
-/// ```
-///     let my_direction_factor = generate_random_direction_factor();
-///     assert_eq!(my_direction_factor.0.abs() + my_direction_factor.1.abs(), 1);
-/// ```
-pub fn generate_random_direction_factor_strict() -> (f32, f32) {
-    let mut rng = rand::thread_rng();
-
-    let direction_factor_x_abs: f32 = rng.gen_range(0.0..1.0);
-    let direction_factor_y_abs: f32 = 1.0 - direction_factor_x_abs;
-
-    let random_sign_generator: u32 = rng.gen_range(0..4);
-    let direction_factor: (f32, f32);
-    match random_sign_generator {
-        0 => direction_factor = (direction_factor_x_abs, direction_factor_y_abs),
-        1 => direction_factor = (direction_factor_x_abs, -direction_factor_y_abs),
-        2 => direction_factor = (-direction_factor_x_abs, direction_factor_y_abs),
-        3 => direction_factor = (-direction_factor_x_abs, -direction_factor_y_abs),
-        _ => direction_factor = (direction_factor_x_abs, direction_factor_y_abs),
-    }
-
-    direction_factor
-}
-
 /// Generate a random position limited to the entry value (in a square)
 ///
 /// # Arguments
@@ -122,10 +95,4 @@ mod tests {
         assert_eq!(calculated_distance, 56.568542);
     }
 
-    #[test]
-    fn calculate_random_factor_strict_test() {
-        let my_direction_factor = generate_random_direction_factor_strict();
-        let factor_added = my_direction_factor.0.abs() + my_direction_factor.1.abs();
-        assert_eq!(factor_added, 1.);
-    }
 }

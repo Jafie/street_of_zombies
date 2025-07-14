@@ -17,7 +17,6 @@ static DEATH_POINT_COEF: u32 = 4;
 static DEFAULT_ENNEMY_HITBOX_SIZE: (f32, f32) = (40., 50.);
 
 struct EnnemyInternalData {
-    fire_direction: (f32, f32),
     health: i32,
     current_weapon: Box<dyn Weapon + Send + Sync>,
     tick_elapsed: f32,
@@ -54,18 +53,16 @@ impl Ennemy {
     /// # Examples
     ///
     /// ```
-    ///     let ennemy = let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+    ///     let ennemy = let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
     /// ```
     pub fn new(
         speed_to_set: f32,
         direction_to_set: (f32, f32),
         initial_pos: (f32, f32),
-        fire_direction: (f32, f32),
         points: u32,
     ) -> Self {
         Ennemy {
             internal_data: EnnemyInternalData {
-                fire_direction: fire_direction,
                 health: INITIAL_HEALTH_POINTS,
                 current_weapon: Box::new(Pistol::new(
                     PROJECTILE_SPEED,
