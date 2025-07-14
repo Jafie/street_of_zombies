@@ -54,21 +54,6 @@ pub fn setup(
         ..Default::default()
     });
 
-    // Hidden ennemy (quick texture load)
-    // This is a "pre-load" of the zombie texture.
-    // Avoid to show a "Zombies" with a player Sprite for few milliseconds.
-    commands.spawn(SpriteSheetBundle {
-        texture_atlas: generate_texture(
-            &asset_server,
-            &mut texture_atlases,
-            TextureToGenerate::ZOMBIE,
-        ),
-        transform: Transform::from_xyz(GAME_AREA_LIMIT_X + 50., GAME_AREA_LIMIT_Y + 50., 0.0),
-        sprite: TextureAtlasSprite::new(1),
-        visibility: Visibility::Hidden,
-        ..Default::default()
-    });
-
     // Main character
     commands
         .spawn(SpriteSheetBundle {
@@ -127,6 +112,21 @@ pub fn setup(
             ..Default::default()
         }))
         .insert(scoreboard::ScoreAndInfo::new());
+
+    // Hidden ennemy (quick texture load)
+    // This is a "pre-load" of the zombie texture.
+    // Avoid to show a "Zombies" with a player Sprite for few milliseconds.
+    commands.spawn(SpriteSheetBundle {
+        texture_atlas: generate_texture(
+            &asset_server,
+            &mut texture_atlases,
+            TextureToGenerate::ZOMBIE,
+        ),
+        transform: Transform::from_xyz(GAME_AREA_LIMIT_X + 50., GAME_AREA_LIMIT_Y + 50., 0.0),
+        sprite: TextureAtlasSprite::new(1),
+        visibility: Visibility::Hidden,
+        ..Default::default()
+    });
 }
 
 /// Capture the keyboard entry to move or fire with the player entity. Managed by as a "Bevy System"

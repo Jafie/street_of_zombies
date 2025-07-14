@@ -140,7 +140,7 @@ pub fn generate_texture(
     let texture_handle = asset_server.load(texture_path);
     let generated_texture = TextureAtlas::from_grid(
         texture_handle, 
-        Vec2::new(80.0, 80.0), 
+        Vec2::new(77.0, 77.0), 
         8, 
         4,
         None,
