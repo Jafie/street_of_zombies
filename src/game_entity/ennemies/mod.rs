@@ -184,35 +184,35 @@ mod tests {
 
     #[test]
     fn ennemy_get_initial_position() {
-        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
 
         assert_eq!(ennemy.get_initial_position(), (15., 20.));
     }
 
     #[test]
     fn ennemy_get_value_per_hits() {
-        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
 
         assert_eq!(ennemy.get_point_value_per_hits(), 50);
     }
 
     #[test]
     fn ennemy_get_value_on_death() {
-        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
 
         assert_eq!(ennemy.get_point_value_on_death(), 50 * DEATH_POINT_COEF);
     }
 
     #[test]
     fn ennemy_set_position_without_alter_default() {
-        let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
         ennemy.sprite_data.set_new_position((60., 40.));
         assert_eq!(ennemy.get_initial_position(), (15., 20.));
     }
 
     #[test]
     fn ennemy_reduce_health() {
-        let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
 
         ennemy.reduce_health();
 
@@ -221,7 +221,7 @@ mod tests {
 
     #[test]
     pub fn ennemy_death_test() {
-        let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let mut ennemy = Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
 
         for _ in 0..INITIAL_HEALTH_POINTS {
             ennemy.reduce_health();
