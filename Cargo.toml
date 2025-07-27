@@ -2,11 +2,11 @@
 name = "street_of_zombies"
 version = "0.1.0"
 authors = ["Jafie <fortun.axel@gmail.com>"]
-edition = "2021"
+edition = "2025"
 
 [profile.release]
-lto = "thin"
-opt-level = 's'
+lto = true
+opt-level = 'z'
 
 [dependencies]
 rand = "0.8"
