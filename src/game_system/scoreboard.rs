@@ -131,11 +131,11 @@ impl ScoreAndInfo {
     }
 
     fn print_board_game_over(&self, text: &mut Text, style: &mut Style) {
-        style.top = Val::Px(GAME_RESOLUTION_HEIGHT / 2.);
+        style.top = Val::Px(GAME_RESOLUTION_HEIGHT / 4.);
         style.left = Val::Px(GAME_RESOLUTION_WIDTH / 4.);
         text.sections[0].value = format!("- GAME OVER -    ");
-        text.sections[1].value = format!("Score =  {:10}", self.get_score());
-        text.sections[2].value = format!("    - GAME OVER -");
+        text.sections[1].value = format!("Score =  {:10}\n", self.get_score());
+        text.sections[2].value = format!(" - PRESS R TO RESTART -");
     }
 }
 
