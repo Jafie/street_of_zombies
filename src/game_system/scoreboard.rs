@@ -7,7 +7,7 @@ use crate::{GAME_RESOLUTION_HEIGHT, GAME_RESOLUTION_WIDTH};
 
 static INITIAL_PLAYER_HEALTH: u32 = 5;
 static MAX_DIFFICULTY_LEVEL: u32 = 5;
-static SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY: u32 = 60;
+static SECONDS_ELAPSED_BEFORE_NEXT_DIFFICULTY: u32 = 30;
 
 struct ScoreAndInfoInternal {
     score: u32,
@@ -72,7 +72,7 @@ impl ScoreAndInfo {
             "HARD",
             "EXTREME",
             "STILL OK?",
-            "!YOU ARE GOING TO DIE!",
+            "!YOU'LL DIE!",
         ];
 
         let difficulty_text =
@@ -90,9 +90,9 @@ impl ScoreAndInfo {
 
     fn print_board_continue(&self, text: &mut Text, difficulty_text: &str) {
         text.sections[0].value = format!("SCORE: {:10}", self.get_score());
-        text.sections[1].value = format!("    -  HEALTH: {:2}", self.get_health());
+        text.sections[1].value = format!(" - HEALTH: {:2}", self.get_health());
         text.sections[2].value = format!(
-            "    -  DIFFICULTY : {:30}  -  {:3}%",
+            " -  DIFFICULTY : {:20} - {:3}%",
             difficulty_text,
             self.get_percent_until_next_difficulty_level()
         );
