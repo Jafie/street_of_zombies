@@ -1,4 +1,5 @@
-use bevy::{prelude::*, sprite::collide_aabb::collide};
+use bevy::math::bounding::{Aabb2d, IntersectsVolume};
+use bevy::prelude::*;
 
 use crate::game_entity::*;
 use crate::game_system::*;
@@ -36,9 +37,10 @@ pub fn projectile_collision_and_score_system(
     mut enemy_query: Query<(&mut ennemies::Ennemy, Entity)>,
     mut player_query: Query<(&mut player::Player, Entity)>,
     projectile_query: Query<(Entity, &projectiles::Projectile)>,
-    mut scoreboard_query: Query<(&mut scoreboard::ScoreAndInfo, &mut Text, &mut Style)>,
+    mut scoreboard_query: Query<(&mut scoreboard::ScoreAndInfo, &mut Node, Entity)>,
+    mut text_writer: TextUiWriter,
 ) {
-    if let Ok((mut score_struct, mut score_text, mut style_text)) = scoreboard_query.get_single_mut() {
+    if let Ok((mut score_struct, mut score_node, score_entity)) = scoreboard_query.single_mut() {
 
     // check collision with objects
     for (collider_entity, projectile) in projectile_query.iter() {
@@ -62,7 +64,7 @@ pub fn projectile_collision_and_score_system(
     }
 
         score_struct.update_percent_until_next_level();
-        score_struct.update_scoarboard_text(&mut score_text, &mut style_text);
+        score_struct.update_scoarboard_text(&mut text_writer, score_entity, &mut score_node);
     }
 }
 
@@ -153,16 +155,16 @@ fn get_position_and_hitboxes(entity: &MoveableSprite) -> (Vec3, Vec2) {
 ///
 /// ```
 ///    let projectile = Projectile::new(500.0, (5., 10.), (15., 20.), 500, false);
-///    let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
-///    assert_eq!(is_entities_collides(&ennemy, &projectile), true);
+///    let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
+///    assert_eq!(is_entities_collides(ennemy.get_moveable_interface(), projectile.get_moveable_interface()), true);
 /// ```
 fn is_entities_collides(first_entity: &MoveableSprite, second_entity: &MoveableSprite) -> bool {
     let (position_1, hitbox_1) = get_position_and_hitboxes(first_entity);
     let (position_2, hitbox_2) = get_position_and_hitboxes(second_entity);
 
-    let collision = collide(position_1, hitbox_1, position_2, hitbox_2);
-
-    collision.is_some()
+    // Hitboxes store full sizes; Aabb2d expects half sizes.
+    Aabb2d::new(position_1.truncate(), hitbox_1 / 2.)
+        .intersects(&Aabb2d::new(position_2.truncate(), hitbox_2 / 2.))
 }
 
 #[cfg(test)]
@@ -186,17 +188,34 @@ mod tests {
         assert_eq!(ennemy_hitbox, Vec2::new(ennemy_hibox.0, ennemy_hibox.1));
     }
 
-    /*
-    TODO: Create a convienient test for this case.
-    --- This test doesn't run... No clues why (Bevy engine? Integration issue? However, work correctly during gameplay) ---
     #[test]
     fn two_moveable_sprite_collides() {
-        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), (25., 30.), 50);
+        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
         let player = player::Player::new(500.0, (5., 10.), (15., 20.));
 
-        assert_eq!(is_entities_collides(ennemy.get_moveable_interface(), player.get_moveable_interface()), true);
+        assert_eq!(
+            is_entities_collides(
+                ennemy.get_moveable_interface(),
+                player.get_moveable_interface()
+            ),
+            true
+        );
     }
-    */
+
+    #[test]
+    fn projectile_just_outside_hitbox_not_collides() {
+        // Ennemy is 40 wide and projectile 10 wide, so edges touch at an x gap of 25.
+        let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (0., 0.), 50);
+        let projectile = projectiles::Projectile::new(500.0, (5., 10.), (30., 0.), 500, false);
+
+        assert_eq!(
+            is_entities_collides(
+                ennemy.get_moveable_interface(),
+                projectile.get_moveable_interface()
+            ),
+            false
+        );
+    }
 
     #[test]
     fn two_moveable_sprite_not_collides() {

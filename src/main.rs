@@ -21,16 +21,16 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "street_of_zombies".to_string(),
-                        resolution: (GAME_RESOLUTION_WIDTH, GAME_RESOLUTION_HEIGHT).into(),
+                        resolution: (GAME_RESOLUTION_WIDTH as u32, GAME_RESOLUTION_HEIGHT as u32).into(),
                         ..Default::default()
                     }),
                     ..Default::default()
                 })
                 .set(RenderPlugin {
-                    render_creation: RenderCreation::Automatic(WgpuSettings {
+                    render_creation: RenderCreation::Automatic(Box::new(WgpuSettings {
                         backends: Some(Backends::VULKAN),
                         ..Default::default()
-                    }),
+                    })),
                     ..Default::default()
                 })
         )

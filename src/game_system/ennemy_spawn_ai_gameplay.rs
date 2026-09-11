@@ -10,15 +10,14 @@ static MAXIMUM_NUMBER_OF_ENNEMIES: usize = 40;
 /// Game System: AI management for ennemies  and manage the part "Difficulty" of the score system. Managed by as a "Bevy System"
 pub fn ennemy_ai_system(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     mut ennemy_query: Query<(&mut ennemies::Ennemy, &mut Transform)>,
     scoreboard_query: Query<&scoreboard::ScoreAndInfo>,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    if let Ok(current_scoreboard) = scoreboard_query.get_single() {
-        movement_of_ennemies(&mut commands, &mut materials, &time, &mut ennemy_query);
+    if let Ok(current_scoreboard) = scoreboard_query.single() {
+        movement_of_ennemies(&mut commands, &time, &mut ennemy_query);
 
         let ennemies_spawned = ennemy_query.iter_mut().count();
 
@@ -27,7 +26,7 @@ pub fn ennemy_ai_system(
                 &mut commands,
                 current_scoreboard.get_difficulty_level(),
                 &asset_server,
-                &mut texture_atlases,
+                &mut texture_atlas_layouts,
             );
         }
     }
@@ -35,7 +34,6 @@ pub fn ennemy_ai_system(
 
 fn movement_of_ennemies(
     commands: &mut Commands,
-    _materials: &mut ResMut<Assets<ColorMaterial>>,
     time: &Res<Time>,
     ennemy_query: &mut Query<(&mut ennemies::Ennemy, &mut Transform)>,
 ) {
@@ -71,7 +69,7 @@ fn ennemy_spawn_system(
     commands: &mut Commands,
     difficulty_level: u32,
     asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
 ) {
     static SPAWN_FACTOR_CLASSIC_ENNEMY: u32 = 1100;
     let generated_spawn_factor = SPAWN_FACTOR_CLASSIC_ENNEMY - (200 * difficulty_level);
@@ -80,14 +78,14 @@ fn ennemy_spawn_system(
     let rand_system = rng.gen_range(0..generated_spawn_factor);
 
     if rand_system <= 2 {
-        generate_new_ennemy(commands, asset_server, texture_atlases);
+        generate_new_ennemy(commands, asset_server, texture_atlas_layouts);
     }
 }
 
 fn generate_new_ennemy(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // Random generation
     let ennemy_initial_position: (f32, f32) =
@@ -96,26 +94,23 @@ fn generate_new_ennemy(
         math_and_generator::generate_random_direction_factor();
 
     // Ennemy
-    commands
-        .spawn(SpriteSheetBundle {
-            texture_atlas: generate_texture(
-                asset_server,
-                texture_atlases,
-                TextureToGenerate::ZOMBIE,
-            ),
-            transform: Transform::from_xyz(
-                ennemy_initial_position.0,
-                ennemy_initial_position.1,
-                0.0,
-            ),
-            sprite: TextureAtlasSprite::new(1),
-            ..Default::default()
-        })
-        .insert(ennemies::Ennemy::new(
+    commands.spawn((
+        generate_texture(
+            asset_server,
+            texture_atlas_layouts,
+            TextureToGenerate::ZOMBIE,
+        ),
+        Transform::from_xyz(
+            ennemy_initial_position.0,
+            ennemy_initial_position.1,
+            0.0,
+        ),
+        ennemies::Ennemy::new(
             INITIAL_ENNEMY_SPEED,
             ennemy_initial_direction,
             ennemy_initial_position,
             50,
-        ))
-        .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
+        ),
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+    ));
 }

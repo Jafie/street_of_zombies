@@ -28,7 +28,7 @@ pub trait Weapon {
         Self: Sized;
 
     /// The generic fire command. Will generate a projectile following the weapon type defined
-    /// 
+    ///
     /// # Arguments
     ///
     /// * `command` - The bevy command interface.
@@ -45,7 +45,7 @@ pub trait Weapon {
         initial_pos: (f32, f32),
         is_ennemy: bool,
     ) {
-        if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_seconds()) {
+        if self.get_amo() > 0 && self.is_ready_to_fire(time.delta_secs()) {
             self.fire_with_weapon(commands, direction, initial_pos, is_ennemy);
             self.reduce_amo();
         }
@@ -60,22 +60,20 @@ pub trait Weapon {
     ) {
         let (pos_x, pox_y) = initial_pos;
         let asset_color = if is_ennemy {
-            Color::hex("FF0000").unwrap()
+            Color::srgb(1.0, 0.0, 0.0)
         } else {
-            Color::hex("FFFFFF").unwrap()
+            Color::WHITE
         };
 
-        commands
-            .spawn(SpriteBundle {
-                sprite: Sprite {
-                    color: asset_color,
-                    custom_size: Some(Vec2::new(5.0, 5.0)),
-                    ..Default::default()
-                },
-                transform: Transform::from_xyz(pos_x, pox_y, 0.0),
+        commands.spawn((
+            Sprite {
+                color: asset_color,
+                custom_size: Some(Vec2::new(5.0, 5.0)),
                 ..Default::default()
-            })
-            .insert(self.create_projectile(direction, initial_pos, is_ennemy));
+            },
+            Transform::from_xyz(pos_x, pox_y, 0.0),
+            self.create_projectile(direction, initial_pos, is_ennemy),
+        ));
     }
 
     /// Method to reload the weapon amo.
@@ -91,7 +89,7 @@ pub trait Weapon {
     fn is_ready_to_fire(&mut self, time_elapsed_since_last_update: f32) -> bool;
 
     /// Create a new projectile
-    /// 
+    ///
     /// # Arguments
     ///
     /// * `direction_to_set` - The direction of the projectile

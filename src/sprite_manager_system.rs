@@ -1,8 +1,5 @@
 use crate::game_entity::*;
 use bevy::prelude::*;
-use bevy::sprite::TextureAtlas;
-use bevy::sprite::TextureAtlasSprite;
-use bevy::time::Timer;
 
 /// Path to the "ZOMBIE" sprite
 static ZOMBIE_ASSET_PATH: &'static str = "sprites/zombie.png";
@@ -33,20 +30,20 @@ pub fn animate_sprite_system(
         Option<&mut ennemies::Ennemy>,
         Option<&mut player::Player>,
         &mut AnimationTimer,
-        &mut TextureAtlasSprite,
+        &mut Sprite,
     )>,
 ) {
     for (enemy, player, mut timer, mut sprite) in query.iter_mut() {
         if let Some(mut enemy) = enemy {
             animate_sprite(
-                &mut enemy.get_moveable_interface_mut(),
+                enemy.get_moveable_interface_mut(),
                 &time,
                 &mut timer.0,
                 &mut sprite,
             );
         } else if let Some(mut player) = player {
             animate_sprite(
-                &mut player.get_moveable_interface_mut(),
+                player.get_moveable_interface_mut(),
                 &time,
                 &mut timer.0,
                 &mut sprite,
@@ -62,10 +59,13 @@ fn animate_sprite(
     entity: &mut MoveableSprite,
     time: &Res<Time>,
     timer: &mut Timer,
-    sprite: &mut Mut<TextureAtlasSprite>,
+    sprite: &mut Sprite,
 ) {
     timer.tick(time.delta());
-    if timer.finished() && entity.is_sprite_moved_after_last_call() {
+    if timer.is_finished() && entity.is_sprite_moved_after_last_call() {
+        let Some(atlas) = sprite.texture_atlas.as_mut() else {
+            return;
+        };
         let coef_val: usize;
 
         match generate_texture_position_from_coeff_factor(entity.get_direction()) {
@@ -75,8 +75,8 @@ fn animate_sprite(
             TexturePositionEnum::UP => coef_val = 3 * COLS_PER_SPRITES,
         }
 
-        let calculated_index = ((sprite.index + 1) % COLS_PER_SPRITES) + coef_val;
-        sprite.index = calculated_index;
+        let calculated_index = ((atlas.index + 1) % COLS_PER_SPRITES) + coef_val;
+        atlas.index = calculated_index;
     }
 }
 
@@ -124,12 +124,12 @@ pub enum TextureToGenerate {
     ZOMBIE,
 }
 
-/// Generate a texture thanks to a "TextureToGenerate"
+/// Generate an animated sprite (sprite sheet + atlas layout) thanks to a "TextureToGenerate"
 pub fn generate_texture(
     asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
     texture_type: TextureToGenerate,
-) -> Handle<TextureAtlas> {
+) -> Sprite {
     let texture_path: &str;
 
     match texture_type {
@@ -137,17 +137,15 @@ pub fn generate_texture(
         TextureToGenerate::ZOMBIE => texture_path = ZOMBIE_ASSET_PATH,
     }
 
-    let texture_handle = asset_server.load(texture_path);
-    let generated_texture = TextureAtlas::from_grid(
-        texture_handle, 
-        Vec2::new(77.0, 77.0), 
-        8, 
-        4,
-        None,
-        None
-    );
+    let layout = TextureAtlasLayout::from_grid(UVec2::new(77, 77), 8, 4, None, None);
 
-    texture_atlases.add(generated_texture)
+    Sprite::from_atlas_image(
+        asset_server.load(texture_path),
+        TextureAtlas {
+            layout: texture_atlas_layouts.add(layout),
+            index: 1,
+        },
+    )
 }
 
 #[cfg(test)]

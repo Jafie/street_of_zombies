@@ -65,7 +65,13 @@ impl ScoreAndInfo {
         self.score_data.percent_until_next_level = percent_elapsed;
     }
 
-    pub fn update_scoarboard_text(&self, text: &mut Text, style: &mut Style) {
+    /// Section 0 is the root `Text`, sections 1 and 2 are its `TextSpan` children.
+    pub fn update_scoarboard_text(
+        &self,
+        writer: &mut TextUiWriter,
+        text_entity: Entity,
+        node: &mut Node,
+    ) {
         let difficulty_level_list = vec![
             "EASY",
             "NORMAL",
@@ -82,16 +88,21 @@ impl ScoreAndInfo {
             };
 
         if self.is_gameover() {
-            self.print_board_game_over(text, style);
+            self.print_board_game_over(writer, text_entity, node);
         } else {
-            self.print_board_continue(text, difficulty_text);
+            self.print_board_continue(writer, text_entity, difficulty_text);
         }
     }
 
-    fn print_board_continue(&self, text: &mut Text, difficulty_text: &str) {
-        text.sections[0].value = format!("SCORE: {:10}", self.get_score());
-        text.sections[1].value = format!(" - HEALTH: {:2}", self.get_health());
-        text.sections[2].value = format!(
+    fn print_board_continue(
+        &self,
+        writer: &mut TextUiWriter,
+        text_entity: Entity,
+        difficulty_text: &str,
+    ) {
+        *writer.text(text_entity, 0) = format!("SCORE: {:10}", self.get_score());
+        *writer.text(text_entity, 1) = format!(" - HEALTH: {:2}", self.get_health());
+        *writer.text(text_entity, 2) = format!(
             " -  DIFFICULTY : {:20} - {:3}%",
             difficulty_text,
             self.get_percent_until_next_difficulty_level()
@@ -130,12 +141,17 @@ impl ScoreAndInfo {
         }
     }
 
-    fn print_board_game_over(&self, text: &mut Text, style: &mut Style) {
-        style.top = Val::Px(GAME_RESOLUTION_HEIGHT / 4.);
-        style.left = Val::Px(GAME_RESOLUTION_WIDTH / 4.);
-        text.sections[0].value = format!("- GAME OVER -    ");
-        text.sections[1].value = format!("Score =  {:10}\n", self.get_score());
-        text.sections[2].value = format!(" - PRESS R TO RESTART -");
+    fn print_board_game_over(
+        &self,
+        writer: &mut TextUiWriter,
+        text_entity: Entity,
+        node: &mut Node,
+    ) {
+        node.top = Val::Px(GAME_RESOLUTION_HEIGHT / 4.);
+        node.left = Val::Px(GAME_RESOLUTION_WIDTH / 4.);
+        *writer.text(text_entity, 0) = format!("- GAME OVER -    ");
+        *writer.text(text_entity, 1) = format!("Score =  {:10}\n", self.get_score());
+        *writer.text(text_entity, 2) = format!(" - PRESS R TO RESTART -");
     }
 }
 

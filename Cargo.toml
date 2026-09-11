@@ -11,6 +11,11 @@ opt-level = 'z'
 [dependencies]
 rand = "0.8"
 getrandom = { version = "0.3", features = ["wasm_js"] }
-instant = "0.1.12"
-bevy = { version = "0.12", default-features = true, features = ["bevy_winit", "bevy_render", "bevy_gltf", "png", "bevy_sprite"] }
+instant = { version = "0.1.12", features = ["wasm-bindgen"] }
+bevy = { version = "0.19", default-features = true, features = ["bevy_winit", "bevy_render", "bevy_gltf", "png", "bevy_sprite"] }
 uuid = { version = "1", features = ["v4", "rng-getrandom"] }
+
+# rand 0.8 (getrandom 0.2) and Bevy's uuid (getrandom 0.4) only get a web backend through these features.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
+getrandom_04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] }

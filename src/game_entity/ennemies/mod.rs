@@ -133,7 +133,7 @@ impl Ennemy {
             // Add a dummy argument if required by the trait
         );
 
-        self.internal_data.tick_elapsed += time.delta_seconds();
+        self.internal_data.tick_elapsed += time.delta_secs();
 
         if self.internal_data.tick_elapsed > self.internal_data.cooldown_tick {
             self.internal_data.current_weapon.reload();

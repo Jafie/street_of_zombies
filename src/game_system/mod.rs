@@ -46,110 +46,100 @@ impl Plugin for StreetOfZombiesEngine {
 pub fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    texture_atlases: ResMut<Assets<TextureAtlas>>
+    texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>
 ) {
     // cameras
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 
     // Background image
     let background_image: Handle<Image> =
         asset_server.load("images/background_street_of_zombies.png");
-    commands.spawn(SpriteBundle {
-        texture: background_image,
-        ..Default::default()
-    });
+    commands.spawn(Sprite::from_image(background_image));
 
-    spawn_player_and_score(commands, asset_server, texture_atlases);
+    spawn_player_and_score(commands, asset_server, texture_atlas_layouts);
 }
 
 fn spawn_player_and_score(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>) 
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>)
 {
     // Main character
-    commands
-        .spawn(SpriteSheetBundle {
-            texture_atlas: generate_texture(
-                &asset_server,
-                &mut texture_atlases,
-                TextureToGenerate::PLAYER,
-            ),
-            transform: Transform::from_xyz(
-                INITIAL_PLAYER_POSITION_X,
-                INITIAL_PLAYER_POSITION_Y,
-                0.0,
-            ),
-            sprite: TextureAtlasSprite::new(1),
-            ..Default::default()
-        })
-        .insert(player::Player::new(
+    commands.spawn((
+        generate_texture(
+            &asset_server,
+            &mut texture_atlas_layouts,
+            TextureToGenerate::PLAYER,
+        ),
+        Transform::from_xyz(
+            INITIAL_PLAYER_POSITION_X,
+            INITIAL_PLAYER_POSITION_Y,
+            0.0,
+        ),
+        player::Player::new(
             INITIAL_PLAYER_SPEED,
             INITIAL_PLAYER_DIRECTION,
             (INITIAL_PLAYER_POSITION_X, INITIAL_PLAYER_POSITION_Y),
-        ))
-        .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)));
+        ),
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+    ));
 
     // Scoreboard
+    let font: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
+    let text_font = TextFont {
+        font: font.into(),
+        font_size: FontSize::Px(40.0),
+        ..Default::default()
+    };
+
     commands
-        .spawn(TextBundle::from_sections([
-            TextSection::new(
-                "Score",
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgb(0.5, 0.5, 1.0),
-                },
-            ),
-            TextSection::new(
-                "health",
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgb(0.5, 1.0, 0.5),
-                },
-            ),
-            TextSection::new(
-                "Difficulty",
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    font_size: 40.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                },
-            ),
-        ])
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            top: Val::Px(0.0),
-            left: Val::Px(0.0),
-            ..Default::default()
-        }))
-        .insert(scoreboard::ScoreAndInfo::new());
+        .spawn((
+            Text::new("Score"),
+            text_font.clone(),
+            TextColor(Color::srgb(0.5, 0.5, 1.0)),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(0.0),
+                left: Val::Px(0.0),
+                ..Default::default()
+            },
+            scoreboard::ScoreAndInfo::new(),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                TextSpan::new("health"),
+                text_font.clone(),
+                TextColor(Color::srgb(0.5, 1.0, 0.5)),
+            ));
+            parent.spawn((
+                TextSpan::new("Difficulty"),
+                text_font,
+                TextColor(Color::srgb(1.0, 1.0, 1.0)),
+            ));
+        });
 
     // Hidden ennemy (quick texture load)
     // This is a "pre-load" of the zombie texture.
     // Avoid to show a "Zombies" with a player Sprite for few milliseconds.
-    commands.spawn(SpriteSheetBundle {
-        texture_atlas: generate_texture(
+    commands.spawn((
+        generate_texture(
             &asset_server,
-            &mut texture_atlases,
+            &mut texture_atlas_layouts,
             TextureToGenerate::ZOMBIE,
         ),
-        transform: Transform::from_xyz(GAME_AREA_LIMIT_X + 50., GAME_AREA_LIMIT_Y + 50., 0.0),
-        sprite: TextureAtlasSprite::new(1),
-        visibility: Visibility::Hidden,
-        ..Default::default()
-    });
+        Transform::from_xyz(GAME_AREA_LIMIT_X + 50., GAME_AREA_LIMIT_Y + 50., 0.0),
+        Visibility::Hidden,
+    ));
 }
 
 /// Capture the keyboard entry to move or fire with the player entity. Managed by as a "Bevy System"
 pub fn keyboard_capture(
     mut commands: Commands,
     time: Res<Time>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut player::Player, &mut Transform)>,
 ) {
-    if let Ok((mut player, mut transform)) = query.get_single_mut() {
+    if let Ok((mut player, mut transform)) = query.single_mut() {
         let mut direction: (f32, f32) = (0.0, 0.0);
         let mut number_of_valid_pressure: u8 = 0;
 
@@ -161,19 +151,19 @@ pub fn keyboard_capture(
         }
 
         // Movement
-        if keyboard_input.pressed(KeyCode::Left) {
+        if keyboard_input.pressed(KeyCode::ArrowLeft) {
             direction.0 = -1.0;
             number_of_valid_pressure += 1;
         }
-        if keyboard_input.pressed(KeyCode::Right) {
+        if keyboard_input.pressed(KeyCode::ArrowRight) {
             direction.0 = 1.0;
             number_of_valid_pressure += 1;
         }
-        if keyboard_input.pressed(KeyCode::Up) {
+        if keyboard_input.pressed(KeyCode::ArrowUp) {
             direction.1 = 1.0;
             number_of_valid_pressure += 1;
         }
-        if keyboard_input.pressed(KeyCode::Down) {
+        if keyboard_input.pressed(KeyCode::ArrowDown) {
             direction.1 = -1.0;
             number_of_valid_pressure += 1;
         }
@@ -217,7 +207,7 @@ pub fn is_next_movement_out_of_game_area(
 
 /// This "Startup-Item" modify the Window parameter (title and no-resize)
 fn set_window_parameters(mut windows: Query<&mut Window>) {
-    if let Ok(mut window) = windows.get_single_mut() {
+    if let Ok(mut window) = windows.single_mut() {
         window.title = "Street of Zombies".to_string();
         window.resizable = false;
     }
@@ -226,36 +216,36 @@ fn set_window_parameters(mut windows: Query<&mut Window>) {
 /// System to restart the game when R is pressed after game over
 fn restart_on_r_system(
     mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     player_query: Query<Entity, With<Player>>,
     ennemy_query: Query<Entity, With<Ennemy>>,
     projectile_query: Query<Entity, With<Projectile>>,
     scoreboard_entity_query: Query<Entity, With<ScoreAndInfo>>,
     scoreboard_state_query: Query<&ScoreAndInfo>,
     asset_server: Res<AssetServer>,
-    texture_atlases: ResMut<Assets<TextureAtlas>>,
+    texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // Only allow restart if game is over
     let is_gameover = scoreboard_state_query.iter().any(|scoreboard| scoreboard.is_gameover());
 
-    if is_gameover && keyboard_input.just_pressed(KeyCode::R) {
-        // Despawn all relevant entities
+    if is_gameover && keyboard_input.just_pressed(KeyCode::KeyR) {
+        // Despawn all relevant entities (despawn also removes children, e.g. scoreboard text spans)
         for entity in player_query.iter() {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
         for entity in ennemy_query.iter() {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
         for entity in projectile_query.iter() {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
         for entity in scoreboard_entity_query.iter() {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
         // Optionally, despawn other entities (background, etc.) if needed
 
         // Re-run setup to reset the game
-        spawn_player_and_score(commands, asset_server, texture_atlases);
+        spawn_player_and_score(commands, asset_server, texture_atlas_layouts);
     }
 }
 

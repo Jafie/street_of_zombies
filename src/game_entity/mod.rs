@@ -137,8 +137,8 @@ impl MoveableSprite {
         translated_movement: &mut bevy::prelude::Vec3,
     ) {
         // move the sprite
-        translated_movement.x += time.delta_seconds() * direction.0 * &self.get_speed();
-        translated_movement.y += time.delta_seconds() * direction.1 * &self.get_speed();
+        translated_movement.x += time.delta_secs() * direction.0 * &self.get_speed();
+        translated_movement.y += time.delta_secs() * direction.1 * &self.get_speed();
 
         position_to_game_area_limit(translated_movement);
 
