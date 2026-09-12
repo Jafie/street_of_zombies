@@ -1,10 +1,12 @@
 //! Hurting and killing: health, sides, weapons and the projectiles they fire.
 
 mod health;
+mod hit_flash;
 mod projectile;
 mod weapon;
 
 pub use health::Health;
+pub use hit_flash::HitFlash;
 pub use projectile::fire_weapon;
 pub use weapon::{Weapon, WeaponStats};
 
@@ -14,7 +16,7 @@ use crate::game::GameSet;
 
 pub fn plugin(app: &mut App) {
     app.add_message::<Hit>()
-        .add_plugins(projectile::plugin)
+        .add_plugins((projectile::plugin, hit_flash::plugin))
         .add_systems(Update, despawn_dead_system.in_set(GameSet::Cleanup));
 }
 

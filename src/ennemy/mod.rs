@@ -6,7 +6,7 @@ mod spawn;
 use bevy::prelude::*;
 
 use crate::animation::WalkAnimation;
-use crate::combat::{Faction, Health, Weapon, WeaponStats};
+use crate::combat::{Faction, Health, HitFlash, Weapon, WeaponStats};
 use crate::game::{despawn_on_restart, CharacterSprite, GameAssets};
 use crate::physics::{Hitbox, Movement};
 use crate::progression::PointValue;
@@ -16,6 +16,7 @@ const ENNEMY_HEALTH: u32 = 3;
 const ENNEMY_HITBOX: Hitbox = Hitbox(Vec2::new(40., 50.));
 const ENNEMY_POINTS_PER_HIT: u32 = 50;
 const ENNEMY_WEAPON: WeaponStats = WeaponStats::ZOMBIE_PISTOL;
+const ENNEMY_HIT_FLASH: HitFlash = HitFlash::RED;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((ai::plugin, spawn::plugin));
@@ -34,6 +35,7 @@ fn spawn_ennemy(commands: &mut Commands, assets: &GameAssets, position: Vec2, di
         Movement::new(ENNEMY_SPEED, direction),
         ENNEMY_HITBOX,
         Health::new(ENNEMY_HEALTH),
+        ENNEMY_HIT_FLASH,
         Faction::Ennemy,
         PointValue::new(ENNEMY_POINTS_PER_HIT),
         // Empty: the first shots come after the first reload

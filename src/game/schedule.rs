@@ -18,13 +18,13 @@ pub enum GameSet {
     Behavior,
     /// Detect contacts: projectile hits and bonus pick-ups
     Collision,
-    /// Apply the consequences of the contacts: score and game over
+    /// Apply the consequences of the contacts: score, hit flash and game over
     Resolution,
     /// Despawn what died this frame
     Cleanup,
     /// Spawn new ennemies and bonus drops
     Spawn,
-    /// Update what is shown: sprite animation and HUD
+    /// Update what is shown: sprite animation, hit flash tint and HUD
     Presentation,
 }
 
