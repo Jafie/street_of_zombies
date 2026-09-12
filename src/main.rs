@@ -1,18 +1,22 @@
-mod game_entity;
-mod game_system;
-mod sprite_manager_system;
-mod weapons;
+mod animation;
+mod bonus;
+mod combat;
+mod ennemy;
+mod game;
+mod hud;
+mod math;
+mod physics;
+mod player;
+mod progression;
 
 use bevy::prelude::*;
-use bevy::window::WindowPlugin;
-use bevy::render::settings::{WgpuSettings, Backends, RenderCreation};
+use bevy::render::settings::{Backends, RenderCreation, WgpuSettings};
 use bevy::render::RenderPlugin;
-
-use crate::game_system::*;
+use bevy::window::WindowPlugin;
 
 // Resolution
-static GAME_RESOLUTION_WIDTH: f32 = 1024.0;
-static GAME_RESOLUTION_HEIGHT: f32 = 720.0;
+const GAME_RESOLUTION_WIDTH: u32 = 1024;
+const GAME_RESOLUTION_HEIGHT: u32 = 720;
 
 fn main() {
     App::new()
@@ -20,8 +24,9 @@ fn main() {
             DefaultPlugins
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "street_of_zombies".to_string(),
-                        resolution: (GAME_RESOLUTION_WIDTH as u32, GAME_RESOLUTION_HEIGHT as u32).into(),
+                        title: "Street of Zombies".to_string(),
+                        resolution: (GAME_RESOLUTION_WIDTH, GAME_RESOLUTION_HEIGHT).into(),
+                        resizable: false,
                         ..Default::default()
                     }),
                     ..Default::default()
@@ -32,8 +37,8 @@ fn main() {
                         ..Default::default()
                     })),
                     ..Default::default()
-                })
+                }),
         )
-        .add_plugins(StreetOfZombiesEngine)
+        .add_plugins(game::plugin)
         .run();
 }

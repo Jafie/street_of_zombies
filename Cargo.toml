@@ -11,7 +11,6 @@ opt-level = 'z'
 [dependencies]
 rand = "0.8"
 getrandom = { version = "0.3", features = ["wasm_js"] }
-instant = { version = "0.1.12", features = ["wasm-bindgen"] }
 bevy = { version = "0.19", default-features = true, features = ["bevy_winit", "bevy_render", "bevy_gltf", "png", "bevy_sprite"] }
 uuid = { version = "1", features = ["v4", "rng-getrandom"] }
 
