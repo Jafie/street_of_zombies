@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 const BACKGROUND_PATH: &str = "images/background_street_of_zombies.png";
 const FONT_PATH: &str = "fonts/FiraSans-Bold.ttf";
+const SYMBOL_FONT_PATH: &str = "fonts/DejaVuSans-Bold.ttf";
 const PLAYER_SPRITE_SHEET_PATH: &str = "sprites/woman.png";
 const ZOMBIE_SPRITE_SHEET_PATH: &str = "sprites/zombie.png";
 
@@ -35,6 +36,8 @@ pub enum CharacterSprite {
 pub struct GameAssets {
     pub background: Handle<Image>,
     pub font: Handle<Font>,
+    /// Has the symbols `font` lacks, such as the hearts of the scoreboard
+    pub symbol_font: Handle<Font>,
     player_sprite_sheet: Handle<Image>,
     zombie_sprite_sheet: Handle<Image>,
     /// Shared by every character: all sprite sheets use the same grid
@@ -58,6 +61,7 @@ impl FromWorld for GameAssets {
         GameAssets {
             background: asset_server.load(BACKGROUND_PATH),
             font: asset_server.load(FONT_PATH),
+            symbol_font: asset_server.load(SYMBOL_FONT_PATH),
             player_sprite_sheet: asset_server.load(PLAYER_SPRITE_SHEET_PATH),
             zombie_sprite_sheet: asset_server.load(ZOMBIE_SPRITE_SHEET_PATH),
             character_layout,

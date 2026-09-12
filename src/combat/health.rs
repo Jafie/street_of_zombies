@@ -6,16 +6,25 @@ use bevy::prelude::*;
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Health {
     current: u32,
+    max: u32,
 }
 
 impl Health {
     pub fn new(points: u32) -> Self {
-        Health { current: points }
+        Health {
+            current: points,
+            max: points,
+        }
     }
 
     /// Health points left
     pub fn current(&self) -> u32 {
         self.current
+    }
+
+    /// Health points the entity started with
+    pub fn max(&self) -> u32 {
+        self.max
     }
 
     /// Remove health points, stopping at zero
@@ -39,6 +48,14 @@ mod tests {
 
         assert_eq!(health.current(), 4);
         assert_eq!(health.is_dead(), false);
+    }
+
+    #[test]
+    fn max_health_kept_after_damage_test() {
+        let mut health = Health::new(5);
+        health.take_damage(2);
+
+        assert_eq!(health.max(), 5);
     }
 
     #[test]
