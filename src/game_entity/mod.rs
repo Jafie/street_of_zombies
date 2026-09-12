@@ -1,3 +1,4 @@
+pub mod bonus;
 pub mod ennemies;
 pub mod player;
 pub mod projectiles;

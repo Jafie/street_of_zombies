@@ -63,8 +63,18 @@ pub fn projectile_collision_and_score_system(
         }
     }
 
+        let bonus_status = player_query
+            .iter()
+            .next()
+            .and_then(|(player, _)| player.get_bonus_status());
+
         score_struct.update_percent_until_next_level();
-        score_struct.update_scoarboard_text(&mut text_writer, score_entity, &mut score_node);
+        score_struct.update_scoarboard_text(
+            &mut text_writer,
+            score_entity,
+            &mut score_node,
+            bonus_status,
+        );
     }
 }
 
@@ -158,7 +168,7 @@ fn get_position_and_hitboxes(entity: &MoveableSprite) -> (Vec3, Vec2) {
 ///    let ennemy = ennemies::Ennemy::new(500.0, (5., 10.), (15., 20.), 50);
 ///    assert_eq!(is_entities_collides(ennemy.get_moveable_interface(), projectile.get_moveable_interface()), true);
 /// ```
-fn is_entities_collides(first_entity: &MoveableSprite, second_entity: &MoveableSprite) -> bool {
+pub fn is_entities_collides(first_entity: &MoveableSprite, second_entity: &MoveableSprite) -> bool {
     let (position_1, hitbox_1) = get_position_and_hitboxes(first_entity);
     let (position_2, hitbox_2) = get_position_and_hitboxes(second_entity);
 

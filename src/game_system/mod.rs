@@ -1,3 +1,4 @@
+pub mod bonus_gameplay;
 pub mod ennemy_spawn_ai_gameplay;
 pub mod math_and_generator;
 pub mod projectile_and_kill_gameplay;
@@ -5,6 +6,7 @@ pub mod projectile_and_kill_gameplay;
 mod scoreboard;
 
 use crate::game_entity::*;
+use crate::game_entity::bonus::Bonus;
 use crate::game_entity::ennemies::Ennemy;
 use crate::game_entity::player::Player;
 use crate::game_entity::projectiles::Projectile;
@@ -37,6 +39,7 @@ impl Plugin for StreetOfZombiesEngine {
                 projectile_and_kill_gameplay::projectile_collision_and_score_system,
                 ennemy_spawn_ai_gameplay::ennemy_ai_system,
                 restart_on_r_system,
+                bonus_gameplay::bonus_system,
             ))
             .add_systems(Update, animate_sprite_system.after(keyboard_capture));
     }
@@ -113,8 +116,14 @@ fn spawn_player_and_score(
             ));
             parent.spawn((
                 TextSpan::new("Difficulty"),
-                text_font,
+                text_font.clone(),
                 TextColor(Color::srgb(1.0, 1.0, 1.0)),
+            ));
+            // Active bonus, empty while no bonus is active
+            parent.spawn((
+                TextSpan::new(""),
+                text_font,
+                TextColor(Color::srgb(1.0, 0.84, 0.0)),
             ));
         });
 
@@ -220,6 +229,7 @@ fn restart_on_r_system(
     player_query: Query<Entity, With<Player>>,
     ennemy_query: Query<Entity, With<Ennemy>>,
     projectile_query: Query<Entity, With<Projectile>>,
+    bonus_query: Query<Entity, With<Bonus>>,
     scoreboard_entity_query: Query<Entity, With<ScoreAndInfo>>,
     scoreboard_state_query: Query<&ScoreAndInfo>,
     asset_server: Res<AssetServer>,
@@ -237,6 +247,9 @@ fn restart_on_r_system(
             commands.entity(entity).despawn();
         }
         for entity in projectile_query.iter() {
+            commands.entity(entity).despawn();
+        }
+        for entity in bonus_query.iter() {
             commands.entity(entity).despawn();
         }
         for entity in scoreboard_entity_query.iter() {

@@ -1,6 +1,8 @@
+use crate::game_entity::bonus::BonusKind;
 use crate::game_entity::MoveableSprite;
 use crate::game_entity::MoveableSpriteTrait;
 
+use crate::weapons::MachineGun;
 use crate::weapons::Pistol;
 use crate::weapons::Weapon;
 
@@ -14,6 +16,10 @@ static LIMIT_OF_FIRE: u32 = 700;
 static FIRE_RATE: f32 = 0.18;
 static DEFAULT_PLAYER_HITBOX_SIZE: (f32, f32) = (35., 40.);
 
+// Machine gun bonus weapon data
+static MACHINE_GUN_PROJECTILE_SPEED: f32 = 1200.0;
+static MACHINE_GUN_FIRE_RATE: f32 = 0.06;
+
 /// The Main Character entity, Controllable by the player. - A Player object contains all the information dedicated to a the player.
 #[derive(Component)]
 pub struct Player {
@@ -23,6 +29,13 @@ pub struct Player {
 
 struct PlayerInternal {
     current_weapon: Box<dyn Weapon + Send + Sync>,
+    active_bonus: Option<ActiveBonus>,
+}
+
+/// A bonus picked up by the player, active for a limited time
+struct ActiveBonus {
+    kind: BonusKind,
+    remaining_time: f32,
 }
 
 impl MoveableSpriteTrait for Player {
@@ -51,12 +64,8 @@ impl Player {
     pub fn new(speed_to_set: f32, direction_to_set: (f32, f32), initial_pos: (f32, f32)) -> Self {
         Player {
             player_data: PlayerInternal {
-                current_weapon: Box::new(Pistol::new(
-                    PROJECTILE_SPEED,
-                    FIRE_RATE,
-                    AMO_IN_WEAPON,
-                    LIMIT_OF_FIRE,
-                )),
+                current_weapon: create_default_weapon(),
+                active_bonus: None,
             },
             sprite_data: MoveableSprite::new(
                 speed_to_set,
@@ -100,6 +109,79 @@ impl Player {
     pub fn reload_weapon(&mut self) {
         self.player_data.current_weapon.reload();
     }
+
+    /// Give a bonus to the player for a limited time. Picking up a bonus while one is active restarts the timer.
+    ///
+    /// # Arguments
+    ///
+    /// * `kind` - The bonus to apply
+    /// # Examples
+    ///
+    /// ```
+    ///     let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+    ///     player.apply_bonus(BonusKind::MachineGun);
+    /// ```
+    pub fn apply_bonus(&mut self, kind: BonusKind) {
+        match kind {
+            BonusKind::MachineGun => {
+                let mut machine_gun = Box::new(MachineGun::new(
+                    MACHINE_GUN_PROJECTILE_SPEED,
+                    MACHINE_GUN_FIRE_RATE,
+                    AMO_IN_WEAPON,
+                    LIMIT_OF_FIRE,
+                ));
+                // Weapons start empty, and the player only reloads while not firing
+                machine_gun.reload();
+                self.player_data.current_weapon = machine_gun;
+            }
+        }
+
+        self.player_data.active_bonus = Some(ActiveBonus {
+            kind,
+            remaining_time: kind.get_duration(),
+        });
+    }
+
+    /// Reduce the time left of the active bonus. When the bonus ends, the default weapon is restored.
+    ///
+    /// # Arguments
+    ///
+    /// * `delta_secs` - The time elapsed since the last call
+    pub fn update_bonus(&mut self, delta_secs: f32) {
+        let is_bonus_ended = match &mut self.player_data.active_bonus {
+            Some(active_bonus) => {
+                active_bonus.remaining_time -= delta_secs;
+                active_bonus.remaining_time <= 0.0
+            }
+            None => false,
+        };
+
+        if is_bonus_ended {
+            self.player_data.active_bonus = None;
+            self.player_data.current_weapon = create_default_weapon();
+            self.player_data.current_weapon.reload();
+        }
+    }
+
+    /// Get the name of the active bonus and its remaining time (in seconds, rounded up)
+    pub fn get_bonus_status(&self) -> Option<(&'static str, u32)> {
+        self.player_data.active_bonus.as_ref().map(|active_bonus| {
+            (
+                active_bonus.kind.get_name(),
+                active_bonus.remaining_time.ceil() as u32,
+            )
+        })
+    }
+}
+
+/// Create the weapon used by the player when no bonus is active
+fn create_default_weapon() -> Box<dyn Weapon + Send + Sync> {
+    Box::new(Pistol::new(
+        PROJECTILE_SPEED,
+        FIRE_RATE,
+        AMO_IN_WEAPON,
+        LIMIT_OF_FIRE,
+    ))
 }
 
 #[cfg(test)]
@@ -115,5 +197,80 @@ mod tests {
         player.player_data.current_weapon.reduce_amo();
         player.reload_weapon();
         assert_eq!(player.player_data.current_weapon.get_amo(), initial_amo);
+    }
+
+    #[test]
+    fn player_without_bonus_test() {
+        let player = Player::new(500.0, (5., 10.), (15., 20.));
+
+        assert_eq!(player.get_bonus_status(), None);
+    }
+
+    #[test]
+    fn player_bonus_applied_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+
+        assert_eq!(player.get_bonus_status(), Some(("MACHINE GUN", 10)));
+    }
+
+    #[test]
+    fn player_bonus_countdown_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+        player.update_bonus(4.0);
+
+        assert_eq!(player.get_bonus_status(), Some(("MACHINE GUN", 6)));
+    }
+
+    #[test]
+    fn player_bonus_ended_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+        player.update_bonus(BonusKind::MachineGun.get_duration() + 0.5);
+
+        assert_eq!(player.get_bonus_status(), None);
+    }
+
+    #[test]
+    fn player_bonus_pickup_restarts_timer_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+        player.update_bonus(7.0);
+        player.apply_bonus(BonusKind::MachineGun);
+
+        assert_eq!(player.get_bonus_status(), Some(("MACHINE GUN", 10)));
+    }
+
+    #[test]
+    fn player_machine_gun_charged_on_pickup_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+
+        assert_eq!(player.player_data.current_weapon.get_amo(), AMO_IN_WEAPON);
+    }
+
+    #[test]
+    fn player_machine_gun_fire_rate_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+        let weapon = &mut player.player_data.current_weapon;
+
+        assert_eq!(weapon.is_ready_to_fire(0.01), true);
+        // 0.1s is longer than the machine gun fire rate
+        assert_eq!(weapon.is_ready_to_fire(0.1), true);
+    }
+
+    #[test]
+    fn player_default_weapon_restored_after_bonus_test() {
+        let mut player = Player::new(500.0, (5., 10.), (15., 20.));
+        player.apply_bonus(BonusKind::MachineGun);
+        player.update_bonus(BonusKind::MachineGun.get_duration() + 0.5);
+        let weapon = &mut player.player_data.current_weapon;
+
+        assert_eq!(weapon.get_amo(), AMO_IN_WEAPON);
+        assert_eq!(weapon.is_ready_to_fire(0.01), true);
+        // 0.1s is shorter than the pistol fire rate
+        assert_eq!(weapon.is_ready_to_fire(0.1), false);
     }
 }

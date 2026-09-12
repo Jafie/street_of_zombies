@@ -65,12 +65,17 @@ impl ScoreAndInfo {
         self.score_data.percent_until_next_level = percent_elapsed;
     }
 
-    /// Section 0 is the root `Text`, sections 1 and 2 are its `TextSpan` children.
+    /// Section 0 is the root `Text`, sections 1 to 3 are its `TextSpan` children.
+    ///
+    /// # Arguments
+    ///
+    /// * `bonus_status` - The name of the player's active bonus and its remaining seconds, if any
     pub fn update_scoarboard_text(
         &self,
         writer: &mut TextUiWriter,
         text_entity: Entity,
         node: &mut Node,
+        bonus_status: Option<(&str, u32)>,
     ) {
         let difficulty_level_list = vec![
             "EASY",
@@ -90,7 +95,7 @@ impl ScoreAndInfo {
         if self.is_gameover() {
             self.print_board_game_over(writer, text_entity, node);
         } else {
-            self.print_board_continue(writer, text_entity, difficulty_text);
+            self.print_board_continue(writer, text_entity, difficulty_text, bonus_status);
         }
     }
 
@@ -99,6 +104,7 @@ impl ScoreAndInfo {
         writer: &mut TextUiWriter,
         text_entity: Entity,
         difficulty_text: &str,
+        bonus_status: Option<(&str, u32)>,
     ) {
         *writer.text(text_entity, 0) = format!("SCORE: {:10}", self.get_score());
         *writer.text(text_entity, 1) = format!(" - HEALTH: {:2}", self.get_health());
@@ -107,6 +113,7 @@ impl ScoreAndInfo {
             difficulty_text,
             self.get_percent_until_next_difficulty_level()
         );
+        *writer.text(text_entity, 3) = format_bonus_text(bonus_status);
     }
 
     fn get_score(&self) -> u32 {
@@ -152,6 +159,20 @@ impl ScoreAndInfo {
         *writer.text(text_entity, 0) = format!("- GAME OVER -    ");
         *writer.text(text_entity, 1) = format!("Score =  {:10}\n", self.get_score());
         *writer.text(text_entity, 2) = format!(" - PRESS R TO RESTART -");
+        *writer.text(text_entity, 3) = String::new();
+    }
+}
+
+/// Format the scoreboard text of the active bonus. Empty when no bonus is active.
+///
+/// # Arguments
+///
+/// * `bonus_status` - The name of the active bonus and its remaining seconds, if any
+fn format_bonus_text(bonus_status: Option<(&str, u32)>) -> String {
+    match bonus_status {
+        // New line: the first line of the scoreboard is already full
+        Some((bonus_name, remaining_seconds)) => format!("\n{}: {}s", bonus_name, remaining_seconds),
+        None => String::new(),
     }
 }
 
@@ -235,5 +256,18 @@ mod tests {
         let player_data = ScoreAndInfo::new();
 
         assert_eq!(player_data.is_gameover(), false);
+    }
+
+    #[test]
+    fn bonus_text_with_active_bonus_test() {
+        assert_eq!(
+            format_bonus_text(Some(("MACHINE GUN", 7))),
+            "\nMACHINE GUN: 7s"
+        );
+    }
+
+    #[test]
+    fn bonus_text_without_bonus_test() {
+        assert_eq!(format_bonus_text(None), "");
     }
 }
