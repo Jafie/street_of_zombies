@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use crate::ennemy::{spawn_ennemy, Ennemy};
-use crate::game::{random_position_in_arena, GameAssets, GameSet};
+use crate::game::{random_position_in_arena, GameAssets, GameSet, GameState};
 use crate::progression::Difficulty;
 
 const MAXIMUM_NUMBER_OF_ENNEMIES: usize = 40;
@@ -16,7 +16,14 @@ const SPAWN_ROLL_RANGE_REDUCTION_PER_LEVEL: u32 = 200;
 const SPAWN_ROLL_THRESHOLD: u32 = 2;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Update, ennemy_spawn_system.in_set(GameSet::Spawn));
+    app.add_systems(
+        Update,
+        ennemy_spawn_system
+            .in_set(GameSet::Spawn)
+            // Ennemies are despawned when leaving the game over screen, not the title screen:
+            // one spawned behind the title would still be there when the first game starts
+            .run_if(not(in_state(GameState::Title))),
+    );
 }
 
 /// Upper bound of the spawn roll for a difficulty level: the lower, the more frequent the spawns

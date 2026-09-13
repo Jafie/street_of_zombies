@@ -2,20 +2,15 @@
 
 use bevy::prelude::*;
 
-use super::{format_score, text_font, ACCENT_COLOR, SCORE_COLOR};
+use super::{format_score, text_font, ACCENT_COLOR, SCORE_COLOR, TITLE_COLOR, TITLE_SHADOW};
 use crate::game::{GameAssets, GameSet, GameState};
 use crate::progression::Score;
 
 const TITLE_FONT_SIZE: f32 = 72.0;
 const FINAL_SCORE_FONT_SIZE: f32 = 32.0;
 const HINT_FONT_SIZE: f32 = 24.0;
-const TITLE_COLOR: Color = Color::srgb(0.9, 0.1, 0.12);
 const HINT_COLOR: Color = Color::WHITE;
 const PANEL_BACKGROUND_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.8);
-const TITLE_SHADOW: TextShadow = TextShadow {
-    offset: Vec2::splat(4.0),
-    color: Color::BLACK,
-};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_game_over_panel_system)
@@ -50,7 +45,7 @@ fn spawn_game_over_panel_system(mut commands: Commands, assets: Res<GameAssets>)
                 align_items: AlignItems::Center,
                 ..Default::default()
             },
-            // Hidden from the start: the first `OnEnter(Playing)` runs before this is spawned
+            // Hidden from the start: the game opens on the title screen
             Visibility::Hidden,
         ))
         .with_children(|root| {

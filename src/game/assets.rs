@@ -18,8 +18,8 @@ const CHARACTER_SHEET_ROWS: u32 = 4;
 const CHARACTER_INITIAL_FRAME: usize = 1;
 
 pub fn plugin(app: &mut App) {
-    // Loaded while the app is built rather than by a startup system: the first
-    // `OnEnter(GameState::Playing)` runs before `PreStartup` and already spawns the player.
+    // Loaded while the app is built rather than by a startup system, so every schedule can use
+    // it: the `OnEnter` of the initial state runs before `PreStartup`.
     app.init_resource::<GameAssets>();
 }
 

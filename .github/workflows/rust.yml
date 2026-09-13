@@ -31,3 +31,47 @@ jobs:
 
     - name: Run tests
       run: cargo test --verbose
+
+  # Publishes the web version to the "web" branch, the GitHub Pages source. Only on a push to main.
+  deploy-web:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: deploy-web
+      cancel-in-progress: true
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add target for web assembly build
+      run: rustup target add wasm32-unknown-unknown
+
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Build - Wasm release
+      run: cargo build --release --target wasm32-unknown-unknown
+
+    # The CLI must match the wasm-bindgen crate resolved in Cargo.lock (not tracked, resolved here).
+    - name: Install wasm-bindgen-cli matching Cargo.lock
+      run: |
+        version=$(cargo pkgid wasm-bindgen | sed 's/.*[@#]//')
+        cargo install wasm-bindgen-cli --version "$version" --locked
+
+    - name: Generate web bindings
+      run: >
+        wasm-bindgen --out-dir dist/target --out-name wasm --target web --no-typescript
+        target/wasm32-unknown-unknown/release/street_of_zombies.wasm
+
+    - name: Assemble site
+      run: cp index.html dist/ && cp -r assets dist/
+
+    - name: Publish to the web branch
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: web
+        publish_dir: ./dist
+        force_orphan: true
